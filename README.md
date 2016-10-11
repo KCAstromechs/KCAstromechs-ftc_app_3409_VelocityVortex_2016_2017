@@ -1,7 +1,7 @@
 #ftc_app_3409_VelocityVortex
 FTC Robot Controller app for FTC Team 3409 (The Astromechs).  This repository is specific to the Velocity Vortex Season.
 
-... more to come ...
+... more to come ... soon!
 
 
 
