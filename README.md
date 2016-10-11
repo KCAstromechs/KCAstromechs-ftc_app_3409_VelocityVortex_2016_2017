@@ -5,13 +5,9 @@ FTC Robot Controller app for FTC Team 3409 (The Astromechs).  This repository is
 
 
 
-************************************************************************************
-************************************************************************************
-***                                                                              ***
-***     ORIGINAL CHANGELOG FROM ftc_app (upstream) @v2.35 FOLLOWS                ***
-***                                                                              ***
-************************************************************************************
-************************************************************************************
+***
+***     ORIGINAL CHANGELOG FROM ftc_app (upstream) @v2.35 FOLLOWS                
+***                                                                              
 
 # ftc_app
 FTC Android Studio project to create FTC Robot Controller app.
