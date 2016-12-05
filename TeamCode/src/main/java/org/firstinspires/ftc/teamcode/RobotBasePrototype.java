@@ -1,5 +1,31 @@
 package org.firstinspires.ftc.teamcode;
 
+/**
+ * Created by N2Class1 on 11/30/2016.
+ */
+
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
+import com.vuforia.Image;
+import com.vuforia.PIXEL_FORMAT;
+import com.vuforia.Vuforia;
+
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+
+import java.nio.ByteBuffer;
+
+import static android.content.Context.SENSOR_SERVICE;
+
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -23,7 +49,7 @@ import java.nio.ByteBuffer;
 import static android.content.Context.SENSOR_SERVICE;
 
 
-public class RobotBaseMsubscript1 implements Msubscript1RobotBaseInterface{
+public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEventListener {
     static final double     COUNTS_PER_MOTOR_REV    = 1100 ;    // NeveRest Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
@@ -36,6 +62,8 @@ public class RobotBaseMsubscript1 implements Msubscript1RobotBaseInterface{
     static final double RELOADER_UP = 0.95;
     static final double RELOADER_MID = 0.5;
     static final double RELOADER_DOWN = 0.2;
+
+    double zero;
 
     public DcMotor motorLeft   = null;
     public DcMotor motorRight  = null;
@@ -56,13 +84,14 @@ public class RobotBaseMsubscript1 implements Msubscript1RobotBaseInterface{
     private Sensor mRotationVectorSensor;
     public float zRotation;
 
-    RobotBaseMsubscript1(LinearOpMode _callingOpMode){callingOpMode=_callingOpMode;}
+    RobotBasePrototype(LinearOpMode _callingOpMode){callingOpMode=_callingOpMode;}
 
     public void init(HardwareMap ahwMap) {
         // Save reference to Hardware map
         hwMap = ahwMap;
 
         // Define and Initialize Motors
+
         motorLeft   = hwMap.dcMotor.get("left");
         motorRight  = hwMap.dcMotor.get("right");
         motorLifter = hwMap.dcMotor.get("lifter");
@@ -118,9 +147,28 @@ public class RobotBaseMsubscript1 implements Msubscript1RobotBaseInterface{
         motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        mSensorManager = (SensorManager)hwMap.appContext.getSystemService(SENSOR_SERVICE);
+        mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+        mSensorManager.registerListener(this, mRotationVectorSensor, 10000);
+
+        zero = zRotation;
+
+    }
+    public double zeroOutGyro() {
+
+        zero = zRotation - zero;
+
+        return zRotation;
+
     }
 
-    public void resetGyro () {gyro.resetZAxisIntegrator();}
+    public void resetGyro () {
+        mSensorManager = (SensorManager)hwMap.appContext.getSystemService(SENSOR_SERVICE);
+        mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+        mSensorManager.registerListener(this, mRotationVectorSensor, 10000);
+
+        callingOpMode.telemetry.addData("Reset gyro! zAxis", zRotation);
+    }
 
     public void driveStraight (double inches, int heading) throws InterruptedException {driveStraight(inches, driveSpeed, heading);}
 
@@ -146,9 +194,9 @@ public class RobotBaseMsubscript1 implements Msubscript1RobotBaseInterface{
         motorRight.setPower(power);
 
         while (Math.abs(encoderMotor.getCurrentPosition()) < target) {
-            error = heading - gyro.getIntegratedZValue();
-            while (error > 180)  error -= 360;
-            while (error <= -180) error += 360;
+            error = heading -zRotation;
+            while (error > 180)  error = -(error-360);
+            while (error <= -180) error = -(error+360);
 
             correction = Range.clip(error * P_DRIVE_COEFF, -1, 1);
 
@@ -303,33 +351,57 @@ public class RobotBaseMsubscript1 implements Msubscript1RobotBaseInterface{
         return orientationCode;
     }
 
-    public void turn(int turnHeading)throws InterruptedException { turn(turnHeading, turnSpeed); }
+    @Override
+    public void outputZAxis() throws InterruptedException {
+        System.out.println("zAxis: " + zRotation);
+        callingOpMode.telemetry.addData("zAxis: " + zRotation, 0);
+        callingOpMode.telemetry.update();
+    }
 
-    public void turn(int turnHeading, double power)throws InterruptedException{
+    public double normalize(double val) {
+        while (val > 180 || val < -180) {
+
+            if (val > 180) {
+                val -= 360;
+            }
+
+            if (val < -180) {
+                val += 360;
+            }
+        }
+        return val;
+    }
+
+    public void turn(double turnHeading)throws InterruptedException { turn(turnHeading, turnSpeed); }
+
+    public void turn(double turnHeading, double power)throws InterruptedException{
         double rightPower;
         double leftPower;
-        double cclockwise = gyro.getHeading() - turnHeading;
-        double clockwise = turnHeading - gyro.getHeading();
+        //zeroOutGyro = -100
+        turnHeading += zeroOutGyro();
+        //turnHeading = -10
+        turnHeading = normalize(turnHeading);
 
-        if (clockwise >= 360){
-            clockwise -= 360;
-        }
-        if (clockwise < 0){
-            clockwise += 360;
-        }
-        if (cclockwise >= 360){
-            cclockwise -= 360;
-        }
-        if (cclockwise < 0){
-            cclockwise += 360;
-        }
+        double cclockwise = zRotation - turnHeading;
+        double clockwise = turnHeading - zRotation;
+
+        callingOpMode.telemetry.addData("Starting turn at: " + zRotation, 0);
+        callingOpMode.telemetry.update();
+
+        clockwise = normalize(clockwise);
+        cclockwise = normalize(cclockwise);
+
+        callingOpMode.telemetry.addData("ccwise", cclockwise);
+        callingOpMode.telemetry.update();
+        callingOpMode.telemetry.addData("cwise", clockwise);
+        callingOpMode.telemetry.update();
 
         if(cclockwise > clockwise){
-            leftPower=power;
-            rightPower=-power;
+            leftPower=-power;
+            rightPower=power;
             motorRight.setPower(rightPower);
             motorLeft.setPower(leftPower);
-            while(Math.abs(gyro.getHeading() - turnHeading) > 2){
+            while(Math.abs(zRotation - turnHeading) > 2){
                 callingOpMode.sleep(50);
                 callingOpMode.idle();
             }
@@ -337,17 +409,20 @@ public class RobotBaseMsubscript1 implements Msubscript1RobotBaseInterface{
             motorLeft.setPower(0);
         }
         else {
-            leftPower=-power;
-            rightPower=power;
+            leftPower=power;
+            rightPower=-power;
             motorRight.setPower(rightPower);
             motorLeft.setPower(leftPower);
-            while(Math.abs(gyro.getHeading() - turnHeading) > 2){
+            while(Math.abs(zRotation - turnHeading) > 2){
                 callingOpMode.sleep(50);
                 callingOpMode.idle();
             }
             motorRight.setPower(0);
             motorLeft.setPower(0);
         }
+        callingOpMode.telemetry.addData("Ending turn at: " + zRotation, 0);
+        callingOpMode.telemetry.update();
+
     }
 
     public void hanShotFirst() throws InterruptedException {
@@ -373,5 +448,21 @@ public class RobotBaseMsubscript1 implements Msubscript1RobotBaseInterface{
 
         return gyro.getHeading();
         //return zRotation;
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        float[] rotationMatrix = new float[9];
+        SensorManager.getRotationMatrixFromVector(rotationMatrix, sensorEvent.values);
+        float[] orientation = new float[3];
+        SensorManager.getOrientation(rotationMatrix, orientation);
+
+        zRotation = (float) Math.toDegrees(orientation[0]);
+    }
+
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 }

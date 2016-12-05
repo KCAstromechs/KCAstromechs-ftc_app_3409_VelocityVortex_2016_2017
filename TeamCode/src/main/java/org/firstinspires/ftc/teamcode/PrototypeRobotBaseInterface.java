@@ -3,15 +3,17 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
-public interface Msubscript1RobotBaseInterface {
+public interface PrototypeRobotBaseInterface {
 
     void init(HardwareMap ahwMap);
 
     void resetGyro();
 
-    void turn(int turnHeading)throws InterruptedException;
+    void turn(double turnHeading)throws InterruptedException;
 
-    void turn(int turnHeading, double power)throws InterruptedException;
+    void turn(double turnHeading, double power)throws InterruptedException;
+
+    public double zeroOutGyro();
 
     void driveStraight (double inches, int heading) throws InterruptedException;
 
@@ -21,5 +23,5 @@ public interface Msubscript1RobotBaseInterface {
 
     int takePicture() throws InterruptedException;
 
-
+    void outputZAxis() throws InterruptedException;
 }

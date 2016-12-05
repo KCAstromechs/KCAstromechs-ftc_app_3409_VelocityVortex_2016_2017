@@ -45,14 +45,14 @@ import com.qualcomm.robotcore.util.Range;
  */
 @TeleOp(name="Mecanum Teleop")
 @Disabled
-public class MecanumTeleOp extends OpMode {
+public class MecanumTeleOp_Kevin extends OpMode {
 
     DcMotor motorFrontRight;
     DcMotor motorFrontLeft;
     DcMotor motorBackRight;
     DcMotor motorBackLeft;
 
-    public MecanumTeleOp() {
+    public MecanumTeleOp_Kevin() {
 
     }
 
