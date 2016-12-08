@@ -13,7 +13,7 @@ public interface PrototypeRobotBaseInterface {
 
     void turn(double turnHeading, double power)throws InterruptedException;
 
-    public double zeroOutGyro();
+    public double zeroOutGyro(double heading);
 
     void driveStraight (double inches, int heading) throws InterruptedException;
 

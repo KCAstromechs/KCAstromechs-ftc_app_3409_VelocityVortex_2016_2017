@@ -154,11 +154,10 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
         zero = zRotation;
 
     }
-    public double zeroOutGyro() {
+    public double zeroOutGyro(double heading) {
+        double x = heading - zero;
 
-        zero = zRotation - zero;
-
-        return zRotation;
+        return x;
 
     }
 
@@ -378,25 +377,25 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
         double rightPower;
         double leftPower;
         //zeroOutGyro = -100
-        turnHeading += zeroOutGyro();
+        turnHeading = zeroOutGyro(turnHeading);
         //turnHeading = -10
         turnHeading = normalize(turnHeading);
+
+        callingOpMode.telemetry.addData("turnHeading", turnHeading);
 
         double cclockwise = zRotation - turnHeading;
         double clockwise = turnHeading - zRotation;
 
-        callingOpMode.telemetry.addData("Starting turn at: " + zRotation, 0);
-        callingOpMode.telemetry.update();
+        callingOpMode.telemetry.addData("Starting turn at " + zRotation, 0);
 
         clockwise = normalize(clockwise);
         cclockwise = normalize(cclockwise);
 
         callingOpMode.telemetry.addData("ccwise", cclockwise);
-        callingOpMode.telemetry.update();
         callingOpMode.telemetry.addData("cwise", clockwise);
         callingOpMode.telemetry.update();
 
-        if(cclockwise > clockwise){
+        if(Math.abs(cclockwise) >= Math.abs(clockwise)){
             leftPower=-power;
             rightPower=power;
             motorRight.setPower(rightPower);
@@ -408,7 +407,7 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
             motorRight.setPower(0);
             motorLeft.setPower(0);
         }
-        else {
+        else if(Math.abs(clockwise) > Math.abs(cclockwise)){
             leftPower=power;
             rightPower=-power;
             motorRight.setPower(rightPower);

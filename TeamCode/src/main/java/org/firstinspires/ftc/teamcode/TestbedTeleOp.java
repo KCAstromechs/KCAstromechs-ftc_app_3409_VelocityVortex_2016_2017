@@ -44,7 +44,7 @@ import com.qualcomm.robotcore.util.Range;
  * Enables control of the robot via the gamepad
  */
 @Disabled
-@TeleOp(name="Testbed Teleop")
+@TeleOp(name="Testbed Teleop", group = "test")
 public class TestbedTeleOp extends OpMode {
 
     DcMotor motorFrontRight;

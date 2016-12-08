@@ -22,51 +22,18 @@ public class BeaconAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-
         robotBase = new RobotBasePrototype (this);
 
         robotBase.init (hardwareMap);
 
         waitForStart();
 
-
-
         robotBase.turn(90);
 
         sleep(2000);
 
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+
 // robotBase.driveStraight(3, 90);
 
 /*
