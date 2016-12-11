@@ -13,15 +13,15 @@ public class GalactwoTeleop extends OpMode {
     DcMotor motorFrontLeft;
     DcMotor motorBackRight;
     DcMotor motorBackLeft;
-  //  DcMotor motorSpinner;
-
+    DcMotor motorSpinner;
+    boolean spinToggle;
     @Override
     public void init(){
-        motorFrontRight=hardwareMap.dcMotor.get("motorFrontRight");
-        motorFrontLeft=hardwareMap.dcMotor.get("motorFrontLeft");
-        motorBackRight=hardwareMap.dcMotor.get("motorBackRight");
-        motorBackLeft=hardwareMap.dcMotor.get("motorBackLeft");
-    //    motorSpinner=hardwareMap.dcMotor.get("motorSpinner");
+        motorFrontRight = hardwareMap.dcMotor.get("motorFrontRight");
+        motorFrontLeft = hardwareMap.dcMotor.get("motorFrontLeft");
+        motorBackRight = hardwareMap.dcMotor.get("motorBackRight");
+        motorBackLeft = hardwareMap.dcMotor.get("motorBackLeft");
+        motorSpinner = hardwareMap.dcMotor.get("motorSpinner");
 
         motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
         motorFrontRight.setDirection(DcMotor.Direction.FORWARD);
@@ -32,6 +32,7 @@ public class GalactwoTeleop extends OpMode {
         motorFrontRight.setPower(0);
         motorBackLeft.setPower(0);
         motorBackRight.setPower(0);
+        boolean spinToggle = true;
     }
 
     @Override
@@ -39,31 +40,42 @@ public class GalactwoTeleop extends OpMode {
 
         // tank drive
         // note that if y equal -1 then joystick is pushed all of the way forward.
-        float left = -gamepad1.left_stick_y;
-        float right = -gamepad1.right_stick_y;
-        float spin = gamepad1.right_trigger;
+        float left = gamepad1.left_stick_y;
+        float right = gamepad1.right_stick_y;
 
         // clip the right/left values so that the values never exceed +/- 1
         right = Range.clip(right, -1, 1);
         left = Range.clip(left, -1, 1);
-        spin = Range.clip(spin, -1, 1);
+        //spin = Range.clip(spin, -1, 1); *reinstate if turned back to float
 
         // scale the joystick value to make it easier to control
         // the robot more precisely at slower speeds.
         right = (float)scaleInput(right);
         left =  (float)scaleInput(left);
-        spin =  (float)scaleInput(spin);
+        //spin =  (float)scaleInput(spin);
 
         // write the values to the drive motors
         motorFrontRight.setPower(right);
         motorBackRight.setPower(right);
         motorFrontLeft.setPower(left);
         motorBackLeft.setPower(left);
-    //    motorSpinner.setPower(spin);
+
+        if(gamepad1.a) {
+            spinToggle = true;
+            if(gamepad1.a && spinToggle)
+            {
+                motorSpinner.setPower(-1.0);
+            }
+        }
+        else if(gamepad1.a == false) {
+            spinToggle = false;
+            motorSpinner.setPower(0.0);
+        }
+
     }
 
     double scaleInput(double dVal)  {
-        double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
+           double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
                 0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00 };
 
         // get the corresponding index for the scaleInput array.
