@@ -9,9 +9,9 @@ public interface PrototypeRobotBaseInterface {
 
     void resetGyro();
 
-    void turn(double turnHeading)throws InterruptedException;
+    void turn(float turnHeading)throws InterruptedException;
 
-    void turn(double turnHeading, double power)throws InterruptedException;
+    void turn(float turnHeading, double power)throws InterruptedException;
 
     public double zeroOutGyro(double heading);
 

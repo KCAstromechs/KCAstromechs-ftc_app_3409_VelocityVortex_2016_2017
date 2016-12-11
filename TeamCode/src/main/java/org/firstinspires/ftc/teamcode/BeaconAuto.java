@@ -29,8 +29,10 @@ public class BeaconAuto extends LinearOpMode {
         waitForStart();
 
         robotBase.turn(90);
+        robotBase.turn(-90);
+        robotBase.turn(0);
+        robotBase.turn(180);
 
-        sleep(2000);
 
 
 
