@@ -41,6 +41,7 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
     static final double RELOADER_MID = 0.5;
     static final double RELOADER_DOWN = 0.2;
 
+
     float zero;
 
     public DcMotor motorLeft   = null;
@@ -50,6 +51,7 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
     public DcMotor motorShooter= null;
     public Servo reloader      = null;
     public Servo release       = null;
+    public boolean hasBeenZeroed = false;
 
     long target;
 
@@ -130,8 +132,6 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
 
         motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        zero = -666;
 
         mSensorManager = (SensorManager)hwMap.appContext.getSystemService(SENSOR_SERVICE);
         mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
@@ -326,35 +326,46 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
     public void Dbg(String label, float value, boolean toDriverStation) {
         if (toDriverStation) {
             callingOpMode.telemetry.addData(label, value);
+            callingOpMode.telemetry.update();
         }
         System.out.println(label + " = " + value);
     }
 
     public void turn(float turnHeading, double power)throws InterruptedException{
+        int wrapFix = 0;
         double rightPower;
         double leftPower;
-        //callingOpMode.telemetry.addData("zRotation:", zRotation);
+        float shiftedTurnHeading = turnHeading;
+
+        turnHeading = normalize360(turnHeading);
 
         float cclockwise = zRotation - turnHeading;
         float clockwise = turnHeading - zRotation;
 
-        Dbg("Starting turn at ", zRotation, false);
+        Dbg("TTT Starting turn at ", zRotation, false);
         callingOpMode.telemetry.update();
 
         clockwise = normalize360(clockwise);
         cclockwise = normalize360(cclockwise);
-        Dbg("zRotation:", zRotation, false);
-        Dbg("ccwise", cclockwise, false);
-        Dbg("cwise", clockwise, false);
+        Dbg("TTT zRotation:", zRotation, false);
+        Dbg("TTT ccwise", cclockwise, false);
+        Dbg("TTT cwise", clockwise, false);
+
+        int error = 3; //sets the distance to the target gyro value that we will accept
+        if (turnHeading - error < 0|| turnHeading + error > 360) {
+            wrapFix = 180; //if within the range where the clockmath breaks, shift to an easier position
+            shiftedTurnHeading = normalize360(turnHeading + wrapFix);
+        }
 
         if(Math.abs(cclockwise) >= Math.abs(clockwise)){
             leftPower=-power;
             rightPower=power;
             motorRight.setPower(rightPower);
             motorLeft.setPower(leftPower);
-            while(Math.abs(zRotation - turnHeading) > 2){
-                Dbg("zRotation:", zRotation, false);
-                callingOpMode.sleep(50);
+
+            while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error) {
+                Dbg("TTT zRotationC:", zRotation, false);
+                callingOpMode.sleep(20);
                 callingOpMode.idle();
             }
             motorRight.setPower(0);
@@ -365,15 +376,16 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
             rightPower=-power;
             motorRight.setPower(rightPower);
             motorLeft.setPower(leftPower);
-            while(Math.abs(zRotation - turnHeading) > 2){
-                Dbg("zRotation:", zRotation, false);
-                callingOpMode.sleep(50);
+            while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error)
+            {
+                Dbg("TTT zRotationCC:", zRotation, false);
+                callingOpMode.sleep(20);
                 callingOpMode.idle();
             }
             motorRight.setPower(0);
             motorLeft.setPower(0);
         }
-        Dbg("Ending turn at: ", zRotation, true);
+        Dbg("TTT Ending turn at: ", zRotation, true);
         callingOpMode.telemetry.update();
 
     }
@@ -403,13 +415,16 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
         SensorManager.getRotationMatrixFromVector(rotationMatrix, sensorEvent.values);
         float[] orientation = new float[3];
         SensorManager.getOrientation(rotationMatrix, orientation);
-        float rawGyro = normalize360((float) Math.toDegrees(orientation[0]));
-        if(zero == -666) {
+//        Dbg("orientation: " , orientation[0], false);
+
+        float rawGyro = (float) Math.toDegrees(orientation[0]);
+        if (!hasBeenZeroed) {
+            hasBeenZeroed = true;
             zero = rawGyro;
             Dbg("zero: ", zero, false);
         }
-        zRotation = rawGyro - zero;
-        Dbg("zRotation: " , zRotation, false);
+        zRotation = normalize360(rawGyro - zero);
+//        Dbg("zRotation in callback: " , zRotation, false);
     }
 
 
