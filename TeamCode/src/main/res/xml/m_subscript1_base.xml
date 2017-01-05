@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot type="FirstInspires-FTC-template">
+
+    <MotorController name="drive_motors" serialNumber="FakeUSB:cf2679f1-2fd5-47f7-b5eb-5138f5f84d8a">
+        <Motor name="left" port="1" />
+        <Motor name="right" port="2" />
+    </MotorController>
+
+    <MotorController name="aux_motors" serialNumber="FakeUSB:ks7699f7-2yt5-74f7-b5jp-6268f0p44c7b">
+        <Motor name="lifter" port="1" />
+        <Motor name="shooter" port="2" />
+    </MotorController>
+
+    <ServoController name="servos" serialNumber="FakeUSB:19a4969c-a4a6-4056-9178-f0536b8cb5b4">
+        <Servo name="reloader" port="1" />
+        <Servo name="release" port="2" />
+    </ServoController>
+
+    <DeviceInterfaceModule name="dim" serialNumber="FakeUSB:f7d6ed0f-b3c5-491a-9606-660e1258feac">
+        <GyroSensor name="gyro" port="0" />
+    </DeviceInterfaceModule>
+
+</Robot>
