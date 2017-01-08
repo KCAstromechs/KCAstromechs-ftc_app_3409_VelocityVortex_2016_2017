@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp (name="GalactwoTeleOp", group="test")
+@TeleOp (name="Polaris_TeleOp", group="Polaris")
 public class GalactwoTeleop extends OpMode {
 
     DcMotor motorFrontRight;
@@ -14,7 +14,24 @@ public class GalactwoTeleop extends OpMode {
     DcMotor motorBackRight;
     DcMotor motorBackLeft;
     DcMotor motorSpinner;
-    boolean spinToggle;
+    DcMotor motorShooter;
+    boolean spinToggle = false;
+
+    float right;
+    float left;
+    boolean shooterIsBusy = false;
+    long target;
+
+    final float SHOOT_SPEED = 1.0f;
+    int rotation;
+    int targetPos = 5;
+    int index;
+    long nowTime = 0;
+    boolean released = true;
+
+    static final double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
+            0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00 };
+
     @Override
     public void init(){
         motorFrontRight = hardwareMap.dcMotor.get("motorFrontRight");
@@ -22,17 +39,20 @@ public class GalactwoTeleop extends OpMode {
         motorBackRight = hardwareMap.dcMotor.get("motorBackRight");
         motorBackLeft = hardwareMap.dcMotor.get("motorBackLeft");
         motorSpinner = hardwareMap.dcMotor.get("motorSpinner");
+        motorShooter = hardwareMap.dcMotor.get("motorShooter");
 
         motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
         motorFrontRight.setDirection(DcMotor.Direction.FORWARD);
         motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
         motorBackRight.setDirection(DcMotor.Direction.FORWARD);
+        motorShooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         motorFrontLeft.setPower(0);
         motorFrontRight.setPower(0);
         motorBackLeft.setPower(0);
         motorBackRight.setPower(0);
-        boolean spinToggle = true;
+        boolean spinToggle = false;
+
     }
 
     @Override
@@ -40,8 +60,8 @@ public class GalactwoTeleop extends OpMode {
 
         // tank drive
         // note that if y equal -1 then joystick is pushed all of the way forward.
-        float left = gamepad1.left_stick_y;
-        float right = gamepad1.right_stick_y;
+        left = gamepad1.left_stick_y;
+        right = gamepad1.right_stick_y;
 
         // clip the right/left values so that the values never exceed +/- 1
         right = Range.clip(right, -1, 1);
@@ -60,26 +80,65 @@ public class GalactwoTeleop extends OpMode {
         motorFrontLeft.setPower(left);
         motorBackLeft.setPower(left);
 
-        if(gamepad1.a) {
-            spinToggle = true;
-            if(gamepad1.a && spinToggle)
-            {
-                motorSpinner.setPower(-1.0);
+        if(motorShooter.getCurrentPosition()>target || !shooterIsBusy ) {
+            shooterIsBusy=false;
+            if (gamepad1.y) {
+                target=motorShooter.getCurrentPosition()+1600;
+                motorShooter.setPower(0.5);
+                shooterIsBusy=true;
+            } else if (gamepad1.left_bumper) {
+                motorShooter.setPower(0.5);
+            } else {
+                motorShooter.setPower(0);
             }
         }
-        else if(gamepad1.a == false) {
-            spinToggle = false;
-            motorSpinner.setPower(0.0);
-        }
 
+
+
+        /*if(gamepad1.a) {
+
+            if (Math.abs(nowTime) - Math.abs(System.currentTimeMillis()) > 200 || !hasBeenReleased) {
+                if (!spinToggle && !recentlyReleased) {
+                    hasBeenReleased = true;
+                    spinToggle = true;
+                    recentlyReleased = false;
+                    nowTime = System.currentTimeMillis();
+                    motorSpinner.setPower(-1.0);
+                } else if (spinToggle && !recentlyReleased) {
+                } else {
+                    spinToggle = false;
+                    recentlyReleased = true;
+                    motorSpinner.setPower(0);
+                }
+            }
+        }*/
+
+        if(!spinToggle){
+            if (gamepad1.a && released) {
+                motorSpinner.setPower(-1.0);
+                spinToggle = true;
+                released = false;
+            } else if (!gamepad1.a){
+                released = true;
+            }
+        } else {
+            if (gamepad1.a && released){
+                motorSpinner.setPower(0);
+                spinToggle = false;
+                released = false;
+            } else if (!gamepad1.a){
+                released = true;
+            }
+        }
+        if(gamepad1.x) {
+            motorShooter.setPower(1.0);
+        }
     }
 
     double scaleInput(double dVal)  {
-           double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
-                0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00 };
 
         // get the corresponding index for the scaleInput array.
-        int index = (int) (dVal * 16.0);
+        index = (int) (dVal * 16.0);
 
         // index should be positive.
         if (index < 0) {

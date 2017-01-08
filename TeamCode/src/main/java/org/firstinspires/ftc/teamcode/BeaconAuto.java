@@ -1,28 +1,20 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.vuforia.Image;
-import com.vuforia.PIXEL_FORMAT;
-import com.vuforia.Vuforia;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-
-import java.nio.ByteBuffer;
 
 @Autonomous(name="BeaconAuto", group="Test")
 public class BeaconAuto extends LinearOpMode {
 
-    PrototypeRobotBaseInterface robotBase;
+    AstroRobotBaseInterface robotBase;
     VuforiaLocalizer vuforia;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        robotBase = new RobotBasePrototype (this);
+        robotBase = new RobotBasePolaris(this);
 
         robotBase.init (hardwareMap);
 
