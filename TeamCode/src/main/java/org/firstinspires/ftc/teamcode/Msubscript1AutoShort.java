@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Autonomous(name="Msubscript1AutoShort", group="competition")
 public class Msubscript1AutoShort extends LinearOpMode {
 
-    Msubscript1RobotBaseInterface robotBase;
+    AstroRobotBaseInterface robotBase;
 
     @Override
     public void runOpMode() throws InterruptedException {
