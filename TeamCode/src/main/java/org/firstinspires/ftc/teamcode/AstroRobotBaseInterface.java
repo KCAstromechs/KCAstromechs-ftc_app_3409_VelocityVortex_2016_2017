@@ -17,7 +17,7 @@ public interface AstroRobotBaseInterface {
 
     void turn(float turnHeading, double power)throws InterruptedException;
 
-    public double zeroOutGyro(double heading);
+    double zeroOutGyro(double heading);
 
     void driveStraight (double inches, int heading) throws InterruptedException;
 
@@ -27,4 +27,7 @@ public interface AstroRobotBaseInterface {
 
     int takePicture() throws InterruptedException;
 
-    void outputZAxis() throws InterruptedException;}
+    void outputZAxis() throws InterruptedException;
+
+    void pushButton (int heading) throws InterruptedException;
+}

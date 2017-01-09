@@ -6,11 +6,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Autonomous(name="Blue Pos 1", group="Blue")
 public class AutoBluePos1 extends LinearOpMode {
 
-    PrototypeRobotBaseInterface robotBase;
+    AstroRobotBaseInterface robotBase;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robotBase = new RobotBasePrototype(this);
+        robotBase = new RobotBasePolaris(this);
         robotBase.init(hardwareMap);
         int pos;
         waitForStart();
@@ -29,14 +29,20 @@ public class AutoBluePos1 extends LinearOpMode {
 
         //pushes chosen button
         if (pos == 1){
-            robotBase.pushRight(90);
+            robotBase.turn(180);
+            robotBase.driveStraight(8, 180);
+            robotBase.turn(90);
+            robotBase.pushButton(90);
+            robotBase.turn(0);
+            robotBase.driveStraight(8, 0);
         }
         else if (pos == 2) {
-            robotBase.pushLeft(90);
+            robotBase.pushButton(90);
+            robotBase.turn(0);
+        } else {
+            robotBase.turn(0);
         }
 
-        //turn out of 1st beacon
-        robotBase.turn(0);
         //drive to get in position 2nd beacon
         robotBase.driveStraight(48,0);
         //turn to 2nd beacon
@@ -49,10 +55,18 @@ public class AutoBluePos1 extends LinearOpMode {
 
         //push chosen button
         if (pos == 1){
-            robotBase.pushRight(90);
+            robotBase.turn(180);
+            robotBase.driveStraight(8, 180);
+            robotBase.turn(90);
+            robotBase.pushButton(90);
+            robotBase.turn(0);
+            robotBase.driveStraight(8, 0);
         }
         else if (pos == 2) {
-            robotBase.pushLeft(90);
+            robotBase.pushButton(90);
+            robotBase.turn(0);
+        } else {
+            robotBase.turn(0);
         }
 
         //turn to middle, get in position to shoot

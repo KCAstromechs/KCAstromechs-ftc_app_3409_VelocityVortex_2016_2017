@@ -34,12 +34,12 @@ public class GalactwoTeleop extends OpMode {
 
     @Override
     public void init(){
-        motorFrontRight = hardwareMap.dcMotor.get("motorFrontRight");
-        motorFrontLeft = hardwareMap.dcMotor.get("motorFrontLeft");
-        motorBackRight = hardwareMap.dcMotor.get("motorBackRight");
-        motorBackLeft = hardwareMap.dcMotor.get("motorBackLeft");
-        motorSpinner = hardwareMap.dcMotor.get("motorSpinner");
-        motorShooter = hardwareMap.dcMotor.get("motorShooter");
+        motorFrontRight = hardwareMap.dcMotor.get("frontRight");
+        motorFrontLeft = hardwareMap.dcMotor.get("frontLeft");
+        motorBackRight = hardwareMap.dcMotor.get("backRight");
+        motorBackLeft = hardwareMap.dcMotor.get("backLeft");
+        motorSpinner = hardwareMap.dcMotor.get("spinner");
+        motorShooter = hardwareMap.dcMotor.get("shooter");
 
         motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
         motorFrontRight.setDirection(DcMotor.Direction.FORWARD);
