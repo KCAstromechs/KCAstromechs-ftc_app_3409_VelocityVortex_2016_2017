@@ -17,7 +17,7 @@ public class AutoBluePos1 extends LinearOpMode {
         //initial drive out from wall
         robotBase.driveStraight(33, 0);
         robotBase.turn(50);
-        robotBase.driveStraight(27.2, 50);
+        robotBase.driveStraight(20, 50);
 
         //turning to beacon
         robotBase.turn(90);
@@ -28,7 +28,7 @@ public class AutoBluePos1 extends LinearOpMode {
         System.out.println(pos);
 
         //pushes chosen button
-        if (pos == 1){
+        if (pos == 2){
             robotBase.turn(180);
             robotBase.driveStraight(8, 180);
             robotBase.turn(90);
@@ -36,7 +36,7 @@ public class AutoBluePos1 extends LinearOpMode {
             robotBase.turn(0);
             robotBase.driveStraight(8, 0);
         }
-        else if (pos == 2) {
+        else if (pos == 1) {
             robotBase.pushButton(90);
             robotBase.turn(0);
         } else {

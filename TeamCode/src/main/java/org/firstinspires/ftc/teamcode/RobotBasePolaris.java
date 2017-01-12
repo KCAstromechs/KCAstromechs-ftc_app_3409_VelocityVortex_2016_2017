@@ -193,8 +193,8 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
         while (Math.abs(encoderMotor.getCurrentPosition()) < Math.abs(target)) {
             error = heading -zRotation;
-            while (error > 180)  error = -(error-360);
-            while (error <= -180) error = -(error+360);
+            while (error > 180)  error = (error-360);
+            while (error <= -180) error = (error+360);
 
             correction = Range.clip(error * P_DRIVE_COEFF, -1, 1);
 
@@ -249,8 +249,8 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         int thisR, thisB, thisG;
         int xRedAvg   =0;
         int xBlueAvg  =0;
-        int totalBlue =0;
-        int totalRed  =0;
+        int totalBlue =1;
+        int totalRed  =1;
         int xRedSum   =0;
         int xBlueSum  =0;
         int idx = 0;
