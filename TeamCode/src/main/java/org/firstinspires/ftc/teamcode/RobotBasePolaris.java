@@ -192,10 +192,10 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             while (error <= -180) error = -(error+360);
 
             correction = Range.clip(error * P_DRIVE_COEFF, -1, 1);
-
+/*
             if (inches < 0)
                 correction *= -1.0;
-
+*/
             leftPower = power - correction;
             rightPower = power + correction;
 
