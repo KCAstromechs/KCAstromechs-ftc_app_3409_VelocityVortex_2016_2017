@@ -20,16 +20,9 @@ public class BeaconAuto extends LinearOpMode {
 
         waitForStart();
 
-        robotBase.turn(90);
-        sleep(1000);
-        robotBase.turn(10);
-        sleep(1000);
-        robotBase.turn(0);
-        sleep(1000);
-        robotBase.turn(180);
-        sleep(1000);
+        robotBase.driveStraight(-12, -0.5, 0);
 
-
+        //TODO determine drive backwards
 
 // robotBase.driveStraight(3, 90);
 

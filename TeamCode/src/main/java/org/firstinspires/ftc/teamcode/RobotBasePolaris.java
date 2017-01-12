@@ -12,8 +12,10 @@ import android.hardware.SensorManager;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
 import com.vuforia.Image;
 import com.vuforia.PIXEL_FORMAT;
@@ -44,14 +46,15 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
     float zero;
 
-    public DcMotor motorLeft   = null;
-    public DcMotor motorRight  = null;
-    public DcMotor encoderMotor= null;
-    public DcMotor motorLifter = null;
-    public DcMotor motorShooter= null;
-    public Servo reloader      = null;
-    public Servo release       = null;
-    public boolean hasBeenZeroed = false;
+    public DcMotor motorFrontLeft   = null;
+    public DcMotor motorBackLeft    = null;
+    public DcMotor motorFrontRight  = null;
+    public DcMotor motorBackRight   = null;
+    public DcMotor encoderMotor = null;
+    public DcMotor motorLifter  = null;
+    public DcMotor motorShooter = null;
+    public TouchSensor touch   = null;
+    public boolean hasBeenZeroed= false;
 
     long target;
 
@@ -78,38 +81,39 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
         // Define and Initialize Motors
 
-        motorLeft   = hwMap.dcMotor.get("left");
-        motorRight  = hwMap.dcMotor.get("right");
+        motorFrontLeft   = hwMap.dcMotor.get("frontLeft");
+        motorBackLeft   = hwMap.dcMotor.get("backLeft");
+        motorFrontRight  = hwMap.dcMotor.get("frontRight");
+        motorBackRight  = hwMap.dcMotor.get("backRight");
         motorLifter = hwMap.dcMotor.get("lifter");
         motorShooter= hwMap.dcMotor.get("shooter");
 
-        reloader    =hwMap.servo.get("reloader");
-        release     =hwMap.servo.get("release");
+        encoderMotor= hwMap.dcMotor.get("frontLeft");
 
-        reloader.setPosition(RELOADER_UP);
-        release.setPosition(RELEASE_UP);
-
-        encoderMotor= hwMap.dcMotor.get("left");
-
-        motorLeft.setDirection(DcMotor.Direction.REVERSE);
-        motorRight.setDirection(DcMotor.Direction.FORWARD);
+        motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
+        motorBackLeft.setDirection(DcMotor.Direction.FORWARD);
+        motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
+        motorBackRight.setDirection(DcMotor.Direction.REVERSE);
 
         // Set all motors to zero power
-        motorLeft.setPower(0);
-        motorRight.setPower(0);
+        motorFrontLeft.setPower(0);
+        motorFrontRight.setPower(0);
+        motorBackLeft.setPower(0);
+        motorBackRight.setPower(0);
 
         // Set all motors to run without encoders.
-        motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
+        touch = hwMap.touchSensor.get("touch");
 
-
-        // Define and initialize sensors
-        gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
-
-        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         motorShooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -120,18 +124,13 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         callingOpMode.telemetry.addData(">", "Calibrating Gyro");    //
         callingOpMode.telemetry.update();
 
-        gyro.calibrate();
-
-        while (gyro.isCalibrating())  {
-            callingOpMode.sleep(50);
-            callingOpMode.idle();
-        }
-
         callingOpMode.telemetry.addData(">", "Robot Ready.");    //
         callingOpMode.telemetry.update();
 
-        motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         mSensorManager = (SensorManager)hwMap.appContext.getSystemService(SENSOR_SERVICE);
         mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
@@ -176,28 +175,34 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
         target = (int)(inches * COUNTS_PER_INCH);
 
-        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        power = Range.clip(Math.abs(power), 0.0, 1.0);
-        motorLeft.setPower(power);
-        motorRight.setPower(power);
+        power = Range.clip(power, -1.0, 1.0);
+        motorFrontLeft.setPower(power);
+        motorFrontRight.setPower(power);
+        motorBackLeft.setPower(power);
+        motorBackRight.setPower(power);
 
-        while (Math.abs(encoderMotor.getCurrentPosition()) < target) {
+        while (Math.abs(encoderMotor.getCurrentPosition()) < Math.abs(target)) {
             error = heading -zRotation;
             while (error > 180)  error = -(error-360);
             while (error <= -180) error = -(error+360);
 
             correction = Range.clip(error * P_DRIVE_COEFF, -1, 1);
-/*
-            if (inches < 0)
+
+            /*if (inches < 0)
                 correction *= -1.0;
-*/
-            leftPower = power - correction;
-            rightPower = power + correction;
+            */
+            leftPower = power + correction;
+            rightPower = power - correction;
 
             max = Math.max(Math.abs(leftPower), Math.abs(rightPower));
             if (max > 1.0) {
@@ -205,16 +210,18 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
                 rightPower /= max;
             }
 
-            //motorLeft.setPower(leftPower);
-            //motorRight.setPower(rightPower);
+            motorFrontLeft.setPower(leftPower);
+            motorFrontRight.setPower(rightPower);
+            motorBackLeft.setPower(leftPower);
+            motorBackRight.setPower(rightPower);
 
             counter ++;
 
             // Display drive status for the driver.
             callingOpMode.telemetry.addData("Err/St",  "%5.1f/%5.1f",  error, correction);
             callingOpMode.telemetry.addData("Target",  "%7d",      target);
-            callingOpMode.telemetry.addData("Actual",  "%7d:%7d",      motorLeft.getCurrentPosition(),
-                    motorRight.getCurrentPosition());
+            callingOpMode.telemetry.addData("Actual",  "%7d:%7d",      motorFrontLeft.getCurrentPosition(),
+                    motorFrontRight.getCurrentPosition());
             callingOpMode.telemetry.addData("Speed",   "%5.2f:%5.2f",  leftPower, rightPower);
             callingOpMode.telemetry.addData("Counter ", counter);
             callingOpMode.telemetry.update();
@@ -222,14 +229,20 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             callingOpMode.idle();
         }
 
-        motorLeft.setPower(0);
-        motorRight.setPower(0);
+        motorFrontLeft.setPower(0);
+        motorFrontRight.setPower(0);
+        motorBackLeft.setPower(0);
+        motorBackRight.setPower(0);
 
-        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public int takePicture() throws InterruptedException{
@@ -359,32 +372,46 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         }
 
         if(Math.abs(cclockwise) >= Math.abs(clockwise)){
-            leftPower=-power;
-            rightPower=power;
-            motorRight.setPower(rightPower);
-            motorLeft.setPower(leftPower);
-
-            while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error) {
-                Dbg("TTT zRotationC:", zRotation, false);
-                callingOpMode.sleep(20);
-                callingOpMode.idle();
-            }
-            motorRight.setPower(0);
-            motorLeft.setPower(0);
-        }
-        else if(Math.abs(clockwise) > Math.abs(cclockwise)){
             leftPower=power;
             rightPower=-power;
-            motorRight.setPower(rightPower);
-            motorLeft.setPower(leftPower);
-            while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error)
+            motorFrontRight.setPower(rightPower);
+            motorFrontLeft.setPower(leftPower);
+            motorBackRight.setPower(rightPower);
+            motorBackLeft.setPower(leftPower);
+
+            while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error &&
+                    Math.abs(cclockwise) >= Math.abs(clockwise)) {
+                Dbg("TTT zRotationC:", zRotation, false);
+                callingOpMode.sleep(20);
+                cclockwise = normalize360(zRotation - turnHeading);
+                clockwise = normalize360(turnHeading - zRotation);
+                callingOpMode.idle();
+            }
+            motorFrontRight.setPower(0);
+            motorFrontLeft.setPower(0);
+            motorBackRight.setPower(0);
+            motorBackLeft.setPower(0);
+        }
+        else if(Math.abs(clockwise) > Math.abs(cclockwise)){
+            leftPower=-power;
+            rightPower=power;
+            motorFrontRight.setPower(rightPower);
+            motorFrontLeft.setPower(leftPower);
+            motorBackRight.setPower(rightPower);
+            motorBackLeft.setPower(leftPower);
+            while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error &&
+                    Math.abs(clockwise) > Math.abs(cclockwise))
             {
                 Dbg("TTT zRotationCC:", zRotation, false);
                 callingOpMode.sleep(20);
+                cclockwise = normalize360(zRotation - turnHeading);
+                clockwise = normalize360(turnHeading - zRotation);
                 callingOpMode.idle();
             }
-            motorRight.setPower(0);
-            motorLeft.setPower(0);
+            motorFrontRight.setPower(0);
+            motorFrontLeft.setPower(0);
+            motorBackRight.setPower(0);
+            motorBackLeft.setPower(0);
         }
         Dbg("TTT Ending turn at: ", zRotation, true);
         callingOpMode.telemetry.update();
@@ -392,7 +419,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     }
 
     public void hanShotFirst() throws InterruptedException {
-        reloader.setPosition(RELOADER_UP);
+        /*reloader.setPosition(RELOADER_UP);
         callingOpMode.sleep(500);
         reloader.setPosition((((RELOADER_UP-RELOADER_MID)/4)*3)+RELOADER_MID);
         callingOpMode.sleep(500);
@@ -407,7 +434,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorShooter.setPower(0.5);
         while (motorShooter.getCurrentPosition() < target) callingOpMode.sleep(1);
         motorShooter.setPower(0);
-        callingOpMode.sleep(250);
+        callingOpMode.sleep(250);*/
     }
 
     @Override
@@ -432,5 +459,71 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+
+    @Override
+    public void pushButton(int heading) throws InterruptedException {
+        double max;
+        double error;
+        double correction;
+        double leftPower;
+        double rightPower;
+        double power = 0.5;
+
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        power = Range.clip(Math.abs(power), 0.0, 1.0);
+        motorFrontLeft.setPower(power);
+        motorFrontRight.setPower(power);
+        motorBackLeft.setPower(power);
+        motorBackRight.setPower(power);
+
+        while (!touch.isPressed()) {
+            error = heading - zRotation;
+            while (error > 180) error = -(error - 360);
+            while (error <= -180) error = -(error + 360);
+
+            correction = Range.clip(error * P_DRIVE_COEFF, -1, 1);
+
+            leftPower = power + correction;
+            rightPower = power - correction;
+
+            max = Math.max(Math.abs(leftPower), Math.abs(rightPower));
+            if (max > 1.0) {
+                leftPower /= max;
+                rightPower /= max;
+            }
+
+            motorFrontLeft.setPower(leftPower);
+            motorFrontRight.setPower(rightPower);
+            motorBackLeft.setPower(leftPower);
+            motorBackRight.setPower(rightPower);
+        }
+
+        motorFrontLeft.setPower(0);
+        motorFrontRight.setPower(0);
+        motorBackLeft.setPower(0);
+        motorBackRight.setPower(0);
+
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        driveStraight(-12, -0.5, heading);
     }
 }

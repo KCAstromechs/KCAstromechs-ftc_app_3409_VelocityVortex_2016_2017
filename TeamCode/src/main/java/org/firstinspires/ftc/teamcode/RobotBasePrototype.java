@@ -1,9 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-/**
- * Created by N2Class1 on 11/30/2016.
- */
-
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -14,7 +10,6 @@ import android.text.method.Touch;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -32,49 +27,42 @@ import java.sql.SQLOutput;
 import static android.content.Context.SENSOR_SERVICE;
 
 
-public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEventListener {
-    static final double     COUNTS_PER_MOTOR_REV    = 1100 ;    // NeveRest Motor Encoder
-    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
-    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
-    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     driveSpeed             = 0.75;     // Default drive speed for better accuracy.
-    static final double     turnSpeed              = 0.5;      // Default turn speed for better accuracy.
-    static final double     P_DRIVE_COEFF           = 0.1;    // Larger is more responsive, but also less stable
-    static final double RELEASE_UP = 0.75;
-    static final double RELEASE_DOWN = 0;
-    static final double RELOADER_UP = 0.95;
-    static final double RELOADER_MID = 0.5;
-    static final double RELOADER_DOWN = 0.2;
-    static final int BUTTON_PUSH_TURN = 10;
+public class RobotBasePrototype implements AstroRobotBaseInterface, SensorEventListener {
+    private static final double     COUNTS_PER_MOTOR_REV    = 1100 ;    // NeveRest Motor Encoder
+    private static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
+    private static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
+    private static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    private static final double     driveSpeed             = 0.75;     // Default drive speed for better accuracy.
+    private static final double     turnSpeed              = 0.5;      // Default turn speed for better accuracy.
+    private static final double     P_DRIVE_COEFF           = 0.1;    // Larger is more responsive, but also less stable
+    private static final int        BUTTON_PUSH_TURN = 10;
 
-    float zero;
+    private float zero;
 
-    public DcMotor motorLeft    = null;
-    public DcMotor motorRight   = null;
-    public DcMotor encoderMotor = null;
-    public DcMotor motorLifter  = null;
-    public DcMotor motorShooter = null;
-    public Servo reloader       = null;
-    public Servo release        = null;
-    public TouchSensor touch    = null;
-    public boolean hasBeenZeroed= false;
+    private DcMotor motorLeft    = null;
+    private DcMotor motorRight   = null;
+    private DcMotor encoderMotor = null;
+    private DcMotor motorLifter  = null;
+    private DcMotor motorShooter = null;
+    private TouchSensor touch    = null;
+    private boolean hasBeenZeroed= false;
 
     long target;
 
     public ModernRoboticsI2cGyro gyro = null;
 
-    HardwareMap hwMap           =  null;
+    private HardwareMap hwMap    =  null;
 
-    LinearOpMode callingOpMode;
+    private LinearOpMode callingOpMode;
     private SensorManager mSensorManager;
     private Sensor mRotationVectorSensor;
 
     // This is relative to the initial position of the robot.
     // Possible values are:  0-360
     // 0 is set as straight ahead of the robot, 90 is the right, 270 is to the left
-    public float zRotation;
+    private float zRotation;
 
-    VuforiaLocalizer vuforia;
+    private VuforiaLocalizer vuforia;
 
     RobotBasePrototype(LinearOpMode _callingOpMode){callingOpMode=_callingOpMode;}
 
@@ -88,12 +76,6 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
         motorRight  = hwMap.dcMotor.get("right");
         motorLifter = hwMap.dcMotor.get("lifter");
         motorShooter= hwMap.dcMotor.get("shooter");
-
-        reloader    =hwMap.servo.get("reloader");
-        release     =hwMap.servo.get("release");
-
-        reloader.setPosition(RELOADER_UP);
-        release.setPosition(RELEASE_UP);
 
         encoderMotor= hwMap.dcMotor.get("left");
 
@@ -299,6 +281,11 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
         callingOpMode.telemetry.update();
     }
 
+    @Override
+    public void pushButton(int heading) throws InterruptedException {
+
+    }
+
     // Normalize the angle to be between 0 and 360
     public float normalize360(float val) {
         while (val > 360 || val < 0) {
@@ -406,22 +393,7 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
     }
 
     public void hanShotFirst() throws InterruptedException {
-        reloader.setPosition(RELOADER_UP);
-        callingOpMode.sleep(500);
-        reloader.setPosition((((RELOADER_UP-RELOADER_MID)/4)*3)+RELOADER_MID);
-        callingOpMode.sleep(500);
-        reloader.setPosition(((RELOADER_UP-RELOADER_MID)/2)+RELOADER_MID);
-        callingOpMode.sleep(500);
-        reloader.setPosition(((RELOADER_UP-RELOADER_MID)/4)+RELOADER_MID);
-        callingOpMode.sleep(500);
 
-        reloader.setPosition(RELOADER_MID);
-        callingOpMode.sleep(500);
-        target = motorShooter.getCurrentPosition() + 1600;
-        motorShooter.setPower(0.5);
-        while (motorShooter.getCurrentPosition() < target) callingOpMode.sleep(1);
-        motorShooter.setPower(0);
-        callingOpMode.sleep(250);
     }
 
     @Override
@@ -448,113 +420,5 @@ public class RobotBasePrototype implements PrototypeRobotBaseInterface, SensorEv
 
     }
 
-    @Override
-    public void pushLeft (int heading) throws InterruptedException {
-        double max;
-        double error;
-        double correction;
-        double leftPower;
-        double rightPower;
-        double power = 0.5;
-        int Nheading;
 
-        if(heading-BUTTON_PUSH_TURN<=0){
-            Nheading = (heading-BUTTON_PUSH_TURN)+360;
-        } else {
-            Nheading = heading - BUTTON_PUSH_TURN;
-        }
-
-        turn(Nheading);
-
-        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        power = Range.clip(Math.abs(power), 0.0, 1.0);
-        motorLeft.setPower(power);
-        motorRight.setPower(power);
-
-        while (!touch.isPressed()) {
-            error = Nheading - zRotation;
-            while (error > 180) error = -(error - 360);
-            while (error <= -180) error = -(error + 360);
-
-            correction = Range.clip(error * P_DRIVE_COEFF, -1, 1);
-
-            leftPower = power + correction;
-            rightPower = power - correction;
-
-            max = Math.max(Math.abs(leftPower), Math.abs(rightPower));
-            if (max > 1.0) {
-                leftPower /= max;
-                rightPower /= max;
-            }
-
-            motorLeft.setPower(leftPower);
-            motorRight.setPower(rightPower);
-        }
-
-        motorLeft.setPower(0);
-        motorRight.setPower(0);
-
-        driveStraight(-12, -0.5, Nheading);
-        turn(heading);
-    }
-
-    @Override
-    public void pushRight(int heading) throws InterruptedException {
-        double max;
-        double error;
-        double correction;
-        double leftPower;
-        double rightPower;
-        double power = 0.5;
-        int Nheading;
-
-        if(heading+BUTTON_PUSH_TURN>=360){
-            Nheading = (heading+BUTTON_PUSH_TURN)-360;
-        } else {
-            Nheading = heading + BUTTON_PUSH_TURN;
-        }
-
-        turn(Nheading);
-
-        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        power = Range.clip(Math.abs(power), 0.0, 1.0);
-        motorLeft.setPower(power);
-        motorRight.setPower(power);
-
-        while (!touch.isPressed()) {
-            error = Nheading - zRotation;
-            while (error > 180) error = -(error - 360);
-            while (error <= -180) error = -(error + 360);
-
-            correction = Range.clip(error * P_DRIVE_COEFF, -1, 1);
-
-            leftPower = power + correction;
-            rightPower = power - correction;
-
-            max = Math.max(Math.abs(leftPower), Math.abs(rightPower));
-            if (max > 1.0) {
-                leftPower /= max;
-                rightPower /= max;
-            }
-
-            motorLeft.setPower(leftPower);
-            motorRight.setPower(rightPower);
-        }
-
-        motorLeft.setPower(0);
-        motorRight.setPower(0);
-
-        driveStraight(-12, -0.5, Nheading);
-        turn(heading);
-    }
 }

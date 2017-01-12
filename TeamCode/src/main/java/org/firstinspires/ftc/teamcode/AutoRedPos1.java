@@ -6,11 +6,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Autonomous(name="Red Pos 1", group="Red")
 public class AutoRedPos1 extends LinearOpMode {
 
-    PrototypeRobotBaseInterface robotBase;
+    AstroRobotBaseInterface robotBase;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robotBase = new RobotBasePrototype(this);
+        robotBase = new RobotBasePolaris(this);
         robotBase.init(hardwareMap);
         int pos;
         waitForStart();
@@ -28,11 +28,9 @@ public class AutoRedPos1 extends LinearOpMode {
         System.out.println(pos);
 
         //pushes chosen button
-        if (pos == 1){
-            robotBase.pushLeft(270);
+        if (pos == 1) {
         }
         else if (pos == 2) {
-            robotBase.pushRight(270);
         }
 
         //turn out of 1st beacon
@@ -48,11 +46,9 @@ public class AutoRedPos1 extends LinearOpMode {
         System.out.println(pos);
 
         //push chosen button
-        if (pos == 1){
-            robotBase.pushLeft(270);
+        if (pos == 1) {
         }
         else if (pos == 2) {
-            robotBase.pushRight(270);
         }
 
         //turn to middle, get in position to shoot
