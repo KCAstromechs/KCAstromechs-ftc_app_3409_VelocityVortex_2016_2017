@@ -191,7 +191,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackLeft.setPower(power);
         motorBackRight.setPower(power);
 
-        while (Math.abs(encoderMotor.getCurrentPosition()) < Math.abs(target)) {
+        while (Math.abs(encoderMotor.getCurrentPosition()) < Math.abs(target) && callingOpMode.opModeIsActive()) {
             error = heading -zRotation;
             while (error > 180)  error = (error-360);
             while (error <= -180) error = (error+360);
@@ -267,8 +267,8 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         ByteBuffer px = image.getPixels();
 
         int j, i;
-        for (i = 0; i < image.getHeight(); i++) {
-            for (j = 0; j < image.getWidth(); j++) {
+        for (j = 0; j < image.getHeight(); j++) {
+            for (i = 0; i < image.getWidth(); i++) {
                 thisR = px.get() & 0xFF;
                 thisG = px.get() & 0xFF;
                 thisB = px.get() & 0xFF;
@@ -289,12 +289,27 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
         xRedAvg = xRedSum / totalRed;
         xBlueAvg = xBlueSum / totalBlue;
+        System.out.println("xRedAvg: "+ xRedAvg);
+        System.out.println("xBlueAvg: "+ xBlueAvg);
+        System.out.println("xRedSum: "+ xRedSum);
+        System.out.println("xBlueSum: "+ xBlueSum);
+        System.out.println("totalRed: "+ totalRed);
+        System.out.println("totalBlue: "+ totalBlue);
+        System.out.println("width: "+ image.getWidth());
+        System.out.println("height: "+ image.getHeight());
 
+        if(!callingOpMode.opModeIsActive() || totalRed < 100 || totalBlue < 100){
+            //didn't see enough color or opmode is not active
+            return 0;
+        }
         if (xRedAvg > xBlueAvg) {
+            //red on left; blue on right
             return 1;
         } else if (xBlueAvg > xRedAvg) {
+            //blue on left; red on right
             return 2;
         } else {
+            //don't understand
             return 0;
         }
     }
@@ -323,28 +338,6 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
     public void turn(float turnHeading)throws InterruptedException { turn(turnHeading, turnSpeed); }
 
-    public void Dbg(String label, int value, boolean toDriverStation)
-    {
-        if (toDriverStation) {
-            callingOpMode.telemetry.addData(label, value);
-        }
-        System.out.println(label + " = " + value);
-    }
-    public void Dbg(String label, double value, boolean toDriverStation)
-    {
-        if (toDriverStation) {
-            callingOpMode.telemetry.addData(label, value);
-        }
-        System.out.println(label + " = " + value);
-    }
-    public void Dbg(String label, float value, boolean toDriverStation) {
-        if (toDriverStation) {
-            callingOpMode.telemetry.addData(label, value);
-            callingOpMode.telemetry.update();
-        }
-        System.out.println(label + " = " + value);
-    }
-
     public void turn(float turnHeading, double power)throws InterruptedException{
         int wrapFix = 0;
         double rightPower;
@@ -356,14 +349,8 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         float cclockwise = zRotation - turnHeading;
         float clockwise = turnHeading - zRotation;
 
-        Dbg("TTT Starting turn at ", zRotation, false);
-        callingOpMode.telemetry.update();
-
         clockwise = normalize360(clockwise);
         cclockwise = normalize360(cclockwise);
-        Dbg("TTT zRotation:", zRotation, false);
-        Dbg("TTT ccwise", cclockwise, false);
-        Dbg("TTT cwise", clockwise, false);
 
         int error = 3; //sets the distance to the target gyro value that we will accept
         if (turnHeading - error < 0|| turnHeading + error > 360) {
@@ -380,8 +367,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             motorBackLeft.setPower(leftPower);
 
             while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error &&
-                    Math.abs(cclockwise) >= Math.abs(clockwise)) {
-                Dbg("TTT zRotationC:", zRotation, false);
+                    Math.abs(cclockwise) >= Math.abs(clockwise) && callingOpMode.opModeIsActive()) {
                 callingOpMode.sleep(20);
                 cclockwise = normalize360(zRotation - turnHeading);
                 clockwise = normalize360(turnHeading - zRotation);
@@ -400,9 +386,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             motorBackRight.setPower(rightPower);
             motorBackLeft.setPower(leftPower);
             while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error &&
-                    Math.abs(clockwise) > Math.abs(cclockwise))
-            {
-                Dbg("TTT zRotationCC:", zRotation, false);
+                    Math.abs(clockwise) > Math.abs(cclockwise) && callingOpMode.opModeIsActive()) {
                 callingOpMode.sleep(20);
                 cclockwise = normalize360(zRotation - turnHeading);
                 clockwise = normalize360(turnHeading - zRotation);
@@ -413,7 +397,6 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             motorBackRight.setPower(0);
             motorBackLeft.setPower(0);
         }
-        Dbg("TTT Ending turn at: ", zRotation, true);
         callingOpMode.telemetry.update();
 
     }
@@ -449,7 +432,6 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         if (!hasBeenZeroed) {
             hasBeenZeroed = true;
             zero = rawGyro;
-            Dbg("zero: ", zero, false);
         }
         zRotation = normalize360(rawGyro - zero);
 //        Dbg("zRotation in callback: " , zRotation, false);
@@ -487,7 +469,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackLeft.setPower(power);
         motorBackRight.setPower(power);
 
-        while (!touch.isPressed()) {
+        while (!touch.isPressed() && callingOpMode.opModeIsActive()) {
             error = heading - zRotation;
             while (error > 180) error = -(error - 360);
             while (error <= -180) error = -(error + 360);
@@ -525,5 +507,10 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         driveStraight(-12, -0.5, heading);
+    }
+
+    @Override
+    public void deconstruct(){
+        mSensorManager.unregisterListener(this);
     }
 }
