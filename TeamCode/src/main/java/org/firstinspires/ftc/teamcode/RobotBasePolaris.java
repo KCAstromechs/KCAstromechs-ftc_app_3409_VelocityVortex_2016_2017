@@ -26,6 +26,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 import java.nio.ByteBuffer;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import android.os.Environment;
+import android.graphics.Bitmap;
+
 import static android.content.Context.SENSOR_SERVICE;
 
 
@@ -314,8 +322,10 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         ByteBuffer px = image.getPixels();
 
         int j, i;
-        for (j = 0; j < image.getHeight(); j++) {
-            for (i = 0; i < image.getWidth(); i++) {
+        int w = image.getWidth();
+        int h = image.getHeight();
+        for (j = 0; j < h; j++) {
+            for (i = 0; i < w; i++) {
                 thisR = px.get() & 0xFF;
                 thisG = px.get() & 0xFF;
                 thisB = px.get() & 0xFF;
@@ -334,8 +344,55 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             }
         }
 
+        boolean bSavePicture = true;
+        if (bSavePicture)
+        {
+                // Reset the pixel pointer to the start of the image
+                px = image.getPixels();
+                
+                // Create a buffer to hold 32-bit image dataa and fill it
+                int bmpData[] = new int[w * h];
+                int b[] = new int[w * (y + h)];
+                int pixel;
+                int i = 0;
+                for (y = 0; y < h; y++) {
+                        for (x = 0; x < w; x++) {
+                                thisR = px.get() & 0xFF;
+                                thisG = px.get() & 0xFF;
+                                thisB = px.get() & 0xFF;
+                                bmpData[i] = Color.rgb(thisR, thisG, thisB);
+                                i++;
+                        }
+                }
+                
+                // Now create a bitmap object from the buffer
+                Bitmap sb = Bitmap.createBitmap(bmpData, w, h, Bitmap.Config.ARGB_8888);
+                
+                // And save the bitmap to the file system
+                // NOTE:  AndroidManifest.xml needs <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+                try {
+                        //to convert Date to String, use format method of SimpleDateFormat class.
+                        DateFormat dateFormat = new SimpleDateFormat("mm-dd__hh-mm-ss");
+                        String strDate = dateFormat.format(new Date());
+
+                        String path = Environment.getExternalStorageDirectory() + "/Snapshot__" + strDate + ".bmp";
+                        Dbg("Snapshot filename", path);
+
+                        File file = new File(path);
+                        file.createNewFile();
+
+                        FileOutputStream fos = new FileOutputStream(file);
+                        bmp.compress(CompressFormat.PNG, 100, fos);
+                        fos.flush();
+                        fos.close();
+                } catch (Exception e) {
+                        Dbg("Snapshot exception", e.getStackTrace().toString());
+                }               
+        }
+
         xRedAvg = xRedSum / totalRed;
         xBlueAvg = xBlueSum / totalBlue;
+        
         System.out.println("xRedAvg: "+ xRedAvg);
         System.out.println("xBlueAvg: "+ xBlueAvg);
         System.out.println("xRedSum: "+ xRedSum);
@@ -382,6 +439,31 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         }
         return val;
     }
+
+    public void Dbg(String label, int value, boolean toDriverStation=false)
+    {
+        Dbg(label, value.toString(), toDriverStation);
+    }
+    public void Dbg(String label, double value, boolean toDriverStation=false)
+    {
+        Dbg(label, value.toString(), toDriverStation);
+    }
+    public void Dbg(String label, float value, boolean toDriverStation=false) {
+        Dbg(label, value.toString(), toDriverStation);
+    }
+    public void Dbg(String label) {
+        System.out.println(label);
+    }
+    public void Dbg(String label, String value, boolean toDriverStation=false) {
+        if (toDriverStation) {
+            callingOpMode.telemetry.addData(label, value);
+            callingOpMode.telemetry.update();
+        }
+        
+        System.out.println(label + " = " + value);
+        
+        // TODO: Also output to a log file on the phone?
+    }    
 
     public void turn(float turnHeading)throws InterruptedException { turn(turnHeading, turnSpeed); }
 
@@ -492,13 +574,15 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
 
     @Override
-    public void pushButton(int heading) throws InterruptedException {
+    public void pushButton(int heading, double timeOutSec) throws InterruptedException, TimeoutException {
         double max;
         double error;
         double correction;
         double leftPower;
         double rightPower;
         double power = 0.5;
+        long initialTime;
+        timeOutSec *= 1000; //converts to millis
 
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -515,8 +599,8 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorFrontRight.setPower(power);
         motorBackLeft.setPower(power);
         motorBackRight.setPower(power);
-
-        while (!touch.isPressed() && callingOpMode.opModeIsActive()) {
+        initialTime = System.currentTimeMillis();
+        while (!touch.isPressed() && callingOpMode.opModeIsActive() && (System.currentTimeMillis() - initialTime <= timeOutSec )) {
             error = heading - zRotation;
             while (error > 180) error = -(error - 360);
             while (error <= -180) error = -(error + 360);
@@ -536,6 +620,14 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             motorFrontRight.setPower(rightPower);
             motorBackLeft.setPower(leftPower);
             motorBackRight.setPower(rightPower);
+        }
+
+        if (System.currentTimeMillis() - initialTime >= timeOutSec) {
+            motorFrontLeft.setPower(0);
+            motorFrontRight.setPower(0);
+            motorBackLeft.setPower(0);
+            motorBackRight.setPower(0);
+            throw new TimeoutException();
         }
 
         motorFrontLeft.setPower(0);
