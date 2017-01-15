@@ -15,7 +15,6 @@ public class AutoBluePos1 extends LinearOpMode {
         robotBase.init(hardwareMap);
         int pos;
         waitForStart();
-
         robotBase.driveStraight(31, 0);
         robotBase.turn(50);
         robotBase.driveStraight(20, 50);
@@ -28,10 +27,18 @@ public class AutoBluePos1 extends LinearOpMode {
 
         if (pos == 1){
             robotBase.turn(100);
-            robotBase.pushButton(100);
+            try {
+                robotBase.pushButton(100, 2);
+            }
+            catch (TimeoutException e) {
+                robotBase.driveStraight(-12, -0.5, 100);
+            }
         }
         else if (pos == 2) {
-            robotBase.pushButton(90);
+            try {robotBase.pushButton(90, 2);}
+            catch (TimeoutException e) {
+                robotBase.driveStraight(-12, -0.5, 90);
+            }
         }
 
         robotBase.turn(145);
@@ -50,10 +57,16 @@ public class AutoBluePos1 extends LinearOpMode {
         //push chosen button
         if (pos == 1){
             robotBase.turn(100);
-            robotBase.pushButton(100);
+            try {robotBase.pushButton(100, 2);}
+            catch (TimeoutException e) {
+                robotBase.driveStraight(-12, -0.5, 100);
+            }
         }
         else if (pos == 2) {
-            robotBase.pushButton(90);
+            try {robotBase.pushButton(90, 2);}
+            catch (TimeoutException e) {
+                robotBase.driveStraight(-12, -0.5, 90);
+            }
         }
 
         robotBase.deconstruct();

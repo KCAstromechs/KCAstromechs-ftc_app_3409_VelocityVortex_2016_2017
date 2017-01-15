@@ -34,7 +34,7 @@ public interface AstroRobotBaseInterface {
 
     void outputZAxis() throws InterruptedException;
 
-    void pushButton (int heading) throws InterruptedException;
+    void pushButton (int heading, double timeOutSec) throws InterruptedException, TimeoutException;
 
     void deconstruct();
 

@@ -484,13 +484,15 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
 
     @Override
-    public void pushButton(int heading) throws InterruptedException {
+    public void pushButton(int heading, double timeOutSec) throws InterruptedException, TimeoutException {
         double max;
         double error;
         double correction;
         double leftPower;
         double rightPower;
         double power = 0.5;
+        long initialTime;
+        timeOutSec *= 1000; //converts to millis
 
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -507,8 +509,8 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorFrontRight.setPower(power);
         motorBackLeft.setPower(power);
         motorBackRight.setPower(power);
-
-        while (!touch.isPressed() && callingOpMode.opModeIsActive()) {
+        initialTime = System.currentTimeMillis();
+        while (!touch.isPressed() && callingOpMode.opModeIsActive() && (System.currentTimeMillis() - initialTime <= timeOutSec )) {
             error = heading - zRotation;
             while (error > 180) error = -(error - 360);
             while (error <= -180) error = -(error + 360);
@@ -528,6 +530,14 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             motorFrontRight.setPower(rightPower);
             motorBackLeft.setPower(leftPower);
             motorBackRight.setPower(rightPower);
+        }
+
+        if (System.currentTimeMillis() - initialTime >= timeOutSec) {
+            motorFrontLeft.setPower(0);
+            motorFrontRight.setPower(0);
+            motorBackLeft.setPower(0);
+            motorBackRight.setPower(0);
+            throw new TimeoutException();
         }
 
         motorFrontLeft.setPower(0);
