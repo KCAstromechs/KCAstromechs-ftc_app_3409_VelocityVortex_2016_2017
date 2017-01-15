@@ -10,7 +10,8 @@ public class AutoBluePos1 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robotBase = new RobotBasePolaris(this);
+        robotBase = new RobotBasePolaris();
+        robotBase.initCallingOpMode(this);
         robotBase.init(hardwareMap);
         int pos;
         waitForStart();

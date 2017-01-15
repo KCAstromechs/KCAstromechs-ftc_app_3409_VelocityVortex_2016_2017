@@ -66,6 +66,16 @@ public class RobotBasePrototype implements AstroRobotBaseInterface, SensorEventL
 
     RobotBasePrototype(LinearOpMode _callingOpMode){callingOpMode=_callingOpMode;}
 
+    @Override
+    public void initCallingOpMode(LinearOpMode _callingOpMode) {
+
+    }
+
+    @Override
+    public void initTeleop(HardwareMap ahwMap) {
+
+    }
+
     public void init(HardwareMap ahwMap) {
         // Save reference to Hardware map
         hwMap = ahwMap;
@@ -288,6 +298,21 @@ public class RobotBasePrototype implements AstroRobotBaseInterface, SensorEventL
 
     @Override
     public void deconstruct() {
+
+    }
+
+    @Override
+    public void teleopUpdateDrive(float left_stick, float right_stick) {
+
+    }
+
+    @Override
+    public void shooterHandler(boolean y, boolean lb) {
+
+    }
+
+    @Override
+    public void spinnerToggle(boolean a, boolean x) {
 
     }
 

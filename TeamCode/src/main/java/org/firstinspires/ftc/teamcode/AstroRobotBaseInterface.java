@@ -2,12 +2,17 @@ package org.firstinspires.ftc.teamcode;
 
 import android.hardware.Camera;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /**
  * Created by Kevin on 1/7/2016.
  */
 public interface AstroRobotBaseInterface {
+
+    void initCallingOpMode(LinearOpMode _callingOpMode);
+
+    void initTeleop(HardwareMap ahwMap);
 
     void init(HardwareMap ahwMap);
 
@@ -32,4 +37,10 @@ public interface AstroRobotBaseInterface {
     void pushButton (int heading) throws InterruptedException;
 
     void deconstruct();
+
+    void teleopUpdateDrive(float left_stick, float right_stick);
+
+    void shooterHandler(boolean y, boolean lb);
+
+    void spinnerToggle(boolean a, boolean x);
 }

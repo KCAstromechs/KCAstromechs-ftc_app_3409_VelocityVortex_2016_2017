@@ -14,7 +14,9 @@ public class BeaconAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        robotBase = new RobotBasePolaris(this);
+        robotBase = new RobotBasePolaris();
+
+        robotBase.initCallingOpMode(this);
 
         robotBase.init (hardwareMap);
 
