@@ -26,6 +26,14 @@ public class PolarisTeleop extends OpMode {
         robotBase.shooterHandler(gamepad1.y, gamepad1.left_bumper);
 
         robotBase.spinnerToggle(gamepad1.a, gamepad1.x);
+
+        robotBase.teleopUpdateLifter(gamepad2.left_stick_y, gamepad2.right_stick_y);
+
+        robotBase.grabberInREPLACE(gamepad2.b);
+
+        robotBase.grabberOutREPLACE(gamepad2.a);
+
+        robotBase.grabberMidREPLACE(gamepad2.x);
     }
 
 }

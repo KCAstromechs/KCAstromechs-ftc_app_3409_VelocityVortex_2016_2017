@@ -50,11 +50,14 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     public DcMotor motorBackLeft    = null;
     public DcMotor motorFrontRight  = null;
     public DcMotor motorBackRight   = null;
-    public DcMotor encoderMotor = null;
-    public DcMotor motorLifter  = null;
-    public DcMotor motorShooter = null;
-    public DcMotor motorSpinner = null;
-    public TouchSensor touch   = null;
+    public DcMotor encoderMotor     = null;
+    public DcMotor motorLifterLeft  = null;
+    public DcMotor motorLifterRight = null;
+    public DcMotor motorShooter     = null;
+    public DcMotor motorSpinner     = null;
+    public Servo   leftGrabber      = null;
+    public Servo   rightGrabber     = null;
+    public TouchSensor touch        = null;
     public boolean hasBeenZeroed= false;
 
 
@@ -100,6 +103,11 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackLeft = hwMap.dcMotor.get("backLeft");
         motorSpinner = hwMap.dcMotor.get("spinner");
         motorShooter = hwMap.dcMotor.get("shooter");
+        motorLifterLeft = hwMap.dcMotor.get("lifterLeft");
+        motorLifterRight = hwMap.dcMotor.get("lifterRight");
+
+        leftGrabber = hwMap.servo.get("leftGrabber");
+        rightGrabber = hwMap.servo.get("rightGrabber");
 
         motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
         motorFrontRight.setDirection(DcMotor.Direction.FORWARD);
@@ -124,7 +132,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackLeft   = hwMap.dcMotor.get("backLeft");
         motorFrontRight  = hwMap.dcMotor.get("frontRight");
         motorBackRight  = hwMap.dcMotor.get("backRight");
-        motorLifter = hwMap.dcMotor.get("lifter");
+        //motorLifter = hwMap.dcMotor.get("lifter");
         motorShooter= hwMap.dcMotor.get("shooter");
 
         encoderMotor= hwMap.dcMotor.get("frontLeft");
@@ -646,6 +654,55 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         }
         if(x) {
             motorShooter.setPower(1.0);
+        }
+    }
+
+    @Override
+    public void teleopUpdateLifter(float left_stick, float right_stick){
+        float left;
+        float right;
+        // tank drive
+        // note that if y equal -1 then joystick is pushed all of the way forward.
+        left = left_stick;
+        right = right_stick;
+
+        // clip the right/left values so that the values never exceed +/- 1
+        right = Range.clip(right, -1, 1);
+        left = Range.clip(left, -1, 1);
+        //spin = Range.clip(spin, -1, 1); *reinstate if turned back to float
+
+        // scale the joystick value to make it easier to control
+        // the robot more precisely at slower speeds.
+        right = (float)scaleInput(right);
+        left =  (float)scaleInput(left);
+        //spin =  (float)scaleInput(spin);
+
+        // write the values to the drive motors
+        motorLifterRight.setPower(right);
+        motorLifterLeft.setPower(left);
+    }
+
+    @Override
+    public void grabberOutREPLACE(boolean a){
+        if (a) {
+            leftGrabber.setPosition(0.2);
+            rightGrabber.setPosition(0.9);
+        }
+    }
+
+    @Override
+    public void grabberMidREPLACE(boolean x){
+        if (x) {
+            leftGrabber.setPosition(0.4);
+            rightGrabber.setPosition(0.7);
+        }
+    }
+
+    @Override
+    public void grabberInREPLACE(boolean b){
+        if (b) {
+            leftGrabber.setPosition(1);
+            rightGrabber.setPosition(0.1);
         }
     }
 }

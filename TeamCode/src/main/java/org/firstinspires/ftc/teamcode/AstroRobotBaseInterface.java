@@ -43,4 +43,12 @@ public interface AstroRobotBaseInterface {
     void shooterHandler(boolean y, boolean lb);
 
     void spinnerToggle(boolean a, boolean x);
+
+    void teleopUpdateLifter(float left_stick, float right_stick);
+
+    void grabberOutREPLACE(boolean a);
+
+    void grabberMidREPLACE(boolean x);
+
+    void grabberInREPLACE(boolean b);
 }
