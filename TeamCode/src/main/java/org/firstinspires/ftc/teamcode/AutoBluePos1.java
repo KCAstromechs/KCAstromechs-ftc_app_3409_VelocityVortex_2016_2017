@@ -43,6 +43,11 @@ public class AutoBluePos1 extends LinearOpMode {
 
         robotBase.turn(145);
         robotBase.turn(270);
+        //TODO: test shooting
+        robotBase.hanShotFirst();
+        robotBase.turn(250); //twist robot to shake second ball down
+        robotBase.turn(270);
+        robotBase.hanShotFirst();
         if(opModeIsActive()){
             sleep(4000);
         }

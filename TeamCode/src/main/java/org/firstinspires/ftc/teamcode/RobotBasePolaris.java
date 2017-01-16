@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode;
  * Created by N2Class1 on 11/30/2016.
  */
 
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -38,13 +39,13 @@ import static android.content.Context.SENSOR_SERVICE;
 
 
 public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventListener {
-    static final double     COUNTS_PER_MOTOR_REV    = 1100 ;    // NeveRest Motor Encoder
-    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
-    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
-    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     driveSpeed             = 0.75;     // Default drive speed for better accuracy.
-    static final double     turnSpeed              = 0.5;      // Default turn speed for better accuracy.
-    static final double     P_DRIVE_COEFF           = 0.1;    // Larger is more responsive, but also less stable
+    static final double COUNTS_PER_MOTOR_REV = 1100;    // NeveRest Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
+    static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double driveSpeed = 0.75;     // Default drive speed for better accuracy.
+    static final double turnSpeed = 0.5;      // Default turn speed for better accuracy.
+    static final double P_DRIVE_COEFF = 0.1;    // Larger is more responsive, but also less stable
     static final double RELEASE_UP = 0.75;
     static final double RELEASE_DOWN = 0;
     static final double RELOADER_UP = 0.95;
@@ -54,21 +55,21 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
     float zero;
 
-    public DcMotor motorFrontLeft   = null;
-    public DcMotor motorBackLeft    = null;
-    public DcMotor motorFrontRight  = null;
-    public DcMotor motorBackRight   = null;
+    public DcMotor motorFrontLeft = null;
+    public DcMotor motorBackLeft = null;
+    public DcMotor motorFrontRight = null;
+    public DcMotor motorBackRight = null;
     public DcMotor encoderMotor = null;
-    public DcMotor motorLifter  = null;
+    public DcMotor motorLifter = null;
     public DcMotor motorShooter = null;
     public DcMotor motorSpinner = null;
-    public TouchSensor touch   = null;
-    public boolean hasBeenZeroed= false;
+    public TouchSensor touch = null;
+    public boolean hasBeenZeroed = false;
 
 
     public ModernRoboticsI2cGyro gyro = null;
 
-    HardwareMap hwMap           =  null;
+    HardwareMap hwMap = null;
 
     LinearOpMode callingOpMode;
     private SensorManager mSensorManager;
@@ -93,14 +94,16 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     boolean released = true;
     long target;
 
-    static final double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
-            0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00 };
+    static final double[] scaleArray = {0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
+            0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00};
 
     @Override
-    public void initCallingOpMode(LinearOpMode _callingOpMode){callingOpMode=_callingOpMode;}
+    public void initCallingOpMode(LinearOpMode _callingOpMode) {
+        callingOpMode = _callingOpMode;
+    }
 
     @Override
-    public void initTeleop(HardwareMap ahwMap){
+    public void initTeleop(HardwareMap ahwMap) {
         hwMap = ahwMap;
         motorFrontRight = hwMap.dcMotor.get("frontRight");
         motorFrontLeft = hwMap.dcMotor.get("frontLeft");
@@ -128,14 +131,14 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
         // Define and Initialize Motors
 
-        motorFrontLeft   = hwMap.dcMotor.get("frontLeft");
-        motorBackLeft   = hwMap.dcMotor.get("backLeft");
-        motorFrontRight  = hwMap.dcMotor.get("frontRight");
-        motorBackRight  = hwMap.dcMotor.get("backRight");
+        motorFrontLeft = hwMap.dcMotor.get("frontLeft");
+        motorBackLeft = hwMap.dcMotor.get("backLeft");
+        motorFrontRight = hwMap.dcMotor.get("frontRight");
+        motorBackRight = hwMap.dcMotor.get("backRight");
         motorLifter = hwMap.dcMotor.get("lifter");
-        motorShooter= hwMap.dcMotor.get("shooter");
+        motorShooter = hwMap.dcMotor.get("shooter");
 
-        encoderMotor= hwMap.dcMotor.get("frontLeft");
+        encoderMotor = hwMap.dcMotor.get("frontLeft");
 
         motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
         motorBackLeft.setDirection(DcMotor.Direction.FORWARD);
@@ -179,7 +182,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        mSensorManager = (SensorManager)hwMap.appContext.getSystemService(SENSOR_SERVICE);
+        mSensorManager = (SensorManager) hwMap.appContext.getSystemService(SENSOR_SERVICE);
         mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
         mSensorManager.registerListener(this, mRotationVectorSensor, 10000);
 
@@ -201,17 +204,19 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         return x;
     }
 
-    public void resetGyro () {
-        mSensorManager = (SensorManager)hwMap.appContext.getSystemService(SENSOR_SERVICE);
+    public void resetGyro() {
+        mSensorManager = (SensorManager) hwMap.appContext.getSystemService(SENSOR_SERVICE);
         mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
         mSensorManager.registerListener(this, mRotationVectorSensor, 10000);
 
         callingOpMode.telemetry.addData("Reset gyro! zAxis", zRotation);
     }
 
-    public void driveStraight (double inches, int heading) throws InterruptedException {driveStraight(inches, driveSpeed, heading);}
+    public void driveStraight(double inches, int heading) throws InterruptedException {
+        driveStraight(inches, driveSpeed, heading);
+    }
 
-    public void driveStraight (double inches, double power, int heading) throws InterruptedException {
+    public void driveStraight(double inches, double power, int heading) throws InterruptedException {
         int target;
         double max;
         double error;
@@ -220,7 +225,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         double rightPower;
         long counter = 0;
 
-        target = (int)(inches * COUNTS_PER_INCH);
+        target = (int) (inches * COUNTS_PER_INCH);
 
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -239,9 +244,9 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackRight.setPower(power);
 
         while (Math.abs(encoderMotor.getCurrentPosition()) < Math.abs(target) && callingOpMode.opModeIsActive()) {
-            error = heading -zRotation;
-            while (error > 180)  error = (error-360);
-            while (error <= -180) error = (error+360);
+            error = heading - zRotation;
+            while (error > 180) error = (error - 360);
+            while (error <= -180) error = (error + 360);
 
             correction = Range.clip(error * P_DRIVE_COEFF, -1, 1);
 
@@ -262,14 +267,14 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             motorBackLeft.setPower(leftPower);
             motorBackRight.setPower(rightPower);
 
-            counter ++;
+            counter++;
 
             // Display drive status for the driver.
-            callingOpMode.telemetry.addData("Err/St",  "%5.1f/%5.1f",  error, correction);
-            callingOpMode.telemetry.addData("Target",  "%7d",      target);
-            callingOpMode.telemetry.addData("Actual",  "%7d:%7d",      motorFrontLeft.getCurrentPosition(),
+            callingOpMode.telemetry.addData("Err/St", "%5.1f/%5.1f", error, correction);
+            callingOpMode.telemetry.addData("Target", "%7d", target);
+            callingOpMode.telemetry.addData("Actual", "%7d:%7d", motorFrontLeft.getCurrentPosition(),
                     motorFrontRight.getCurrentPosition());
-            callingOpMode.telemetry.addData("Speed",   "%5.2f:%5.2f",  leftPower, rightPower);
+            callingOpMode.telemetry.addData("Speed", "%5.2f:%5.2f", leftPower, rightPower);
             callingOpMode.telemetry.addData("Counter ", counter);
             callingOpMode.telemetry.update();
 
@@ -292,19 +297,19 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public int takePicture() throws InterruptedException{
+    public int takePicture() throws InterruptedException {
         int thisR, thisB, thisG;
-        int xRedAvg   =0;
-        int xBlueAvg  =0;
-        int totalBlue =1;
-        int totalRed  =1;
-        int xRedSum   =0;
-        int xBlueSum  =0;
+        int xRedAvg = 0;
+        int xBlueAvg = 0;
+        int totalBlue = 1;
+        int totalRed = 1;
+        int xRedSum = 0;
+        int xBlueSum = 0;
         int idx = 0;
 
         VuforiaLocalizer.CloseableFrame frame = vuforia.getFrameQueue().take();
-        for (int i = 0; i < frame.getNumImages(); i++){
-            if(frame.getImage(i).getFormat() == PIXEL_FORMAT.RGB888){
+        for (int i = 0; i < frame.getNumImages(); i++) {
+            if (frame.getImage(i).getFormat() == PIXEL_FORMAT.RGB888) {
                 idx = i;
                 break;
             }
@@ -337,64 +342,63 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         }
 
         boolean bSavePicture = true;
-        if (bSavePicture)
-        {
-                // Reset the pixel pointer to the start of the image
-                px = image.getPixels();
-                
-                // Create a buffer to hold 32-bit image dataa and fill it
-                int bmpData[] = new int[w * h];
-                int b[] = new int[w * (y + h)];
-                int pixel;
-                int i = 0;
-                for (y = 0; y < h; y++) {
-                        for (x = 0; x < w; x++) {
-                                thisR = px.get() & 0xFF;
-                                thisG = px.get() & 0xFF;
-                                thisB = px.get() & 0xFF;
-                                bmpData[i] = Color.rgb(thisR, thisG, thisB);
-                                i++;
-                        }
+        if (bSavePicture) {
+            // Reset the pixel pointer to the start of the image
+            px = image.getPixels();
+
+            // Create a buffer to hold 32-bit image dataa and fill it
+            int bmpData[] = new int[w * h];
+            int pixel;
+            int index = 0;
+            int x,y;
+            for (y = 0; y < h; y++) {
+                for (x = 0; x < w; x++) {
+                    thisR = px.get() & 0xFF;
+                    thisG = px.get() & 0xFF;
+                    thisB = px.get() & 0xFF;
+                    bmpData[index] = Color.rgb(thisR, thisG, thisB);
+                    index++;
                 }
-                
-                // Now create a bitmap object from the buffer
-                Bitmap sb = Bitmap.createBitmap(bmpData, w, h, Bitmap.Config.ARGB_8888);
-                
-                // And save the bitmap to the file system
-                // NOTE:  AndroidManifest.xml needs <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-                try {
-                        //to convert Date to String, use format method of SimpleDateFormat class.
-                        DateFormat dateFormat = new SimpleDateFormat("mm-dd__hh-mm-ss");
-                        String strDate = dateFormat.format(new Date());
+            }
 
-                        String path = Environment.getExternalStorageDirectory() + "/Snapshot__" + strDate + ".bmp";
-                        Dbg("Snapshot filename", path);
+            // Now create a bitmap object from the buffer
+            Bitmap bmp = Bitmap.createBitmap(bmpData, w, h, Bitmap.Config.ARGB_8888);
 
-                        File file = new File(path);
-                        file.createNewFile();
+            // And save the bitmap to the file system
+            // NOTE:  AndroidManifest.xml needs <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+            try {
+                //to convert Date to String, use format method of SimpleDateFormat class.
+                DateFormat dateFormat = new SimpleDateFormat("mm-dd__hh-mm-ss");
+                String strDate = dateFormat.format(new Date());
 
-                        FileOutputStream fos = new FileOutputStream(file);
-                        bmp.compress(CompressFormat.PNG, 100, fos);
-                        fos.flush();
-                        fos.close();
-                } catch (Exception e) {
-                        Dbg("Snapshot exception", e.getStackTrace().toString());
-                }               
+                String path = Environment.getExternalStorageDirectory() + "/Snapshot__" + strDate + ".png";
+                Dbg("Snapshot filename", path);
+
+                File file = new File(path);
+                file.createNewFile();
+
+                FileOutputStream fos = new FileOutputStream(file);
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                fos.flush();
+                fos.close();
+            } catch (Exception e) {
+                Dbg("Snapshot exception", e.getStackTrace().toString());
+            }
         }
 
         xRedAvg = xRedSum / totalRed;
         xBlueAvg = xBlueSum / totalBlue;
-        
-        System.out.println("xRedAvg: "+ xRedAvg);
-        System.out.println("xBlueAvg: "+ xBlueAvg);
-        System.out.println("xRedSum: "+ xRedSum);
-        System.out.println("xBlueSum: "+ xBlueSum);
-        System.out.println("totalRed: "+ totalRed);
-        System.out.println("totalBlue: "+ totalBlue);
-        System.out.println("width: "+ image.getWidth());
-        System.out.println("height: "+ image.getHeight());
 
-        if(!callingOpMode.opModeIsActive() || totalRed < 100 || totalBlue < 100){
+        System.out.println("xRedAvg: " + xRedAvg);
+        System.out.println("xBlueAvg: " + xBlueAvg);
+        System.out.println("xRedSum: " + xRedSum);
+        System.out.println("xBlueSum: " + xBlueSum);
+        System.out.println("totalRed: " + totalRed);
+        System.out.println("totalBlue: " + totalBlue);
+        System.out.println("width: " + image.getWidth());
+        System.out.println("height: " + image.getHeight());
+
+        if (!callingOpMode.opModeIsActive() || totalRed < 100 || totalBlue < 100) {
             //didn't see enough color or opmode is not active
             return 0;
         }
@@ -432,21 +436,29 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         return val;
     }
 
-    public void Dbg(String label, int value, boolean toDriverStation=false)
-    {
-        Dbg(label, value.toString(), toDriverStation);
+    public void Dbg(String label, int value, boolean toDriverStation) {
+        Dbg(label, Integer.toString(value), toDriverStation);
     }
-    public void Dbg(String label, double value, boolean toDriverStation=false)
-    {
-        Dbg(label, value.toString(), toDriverStation);
+    public void Dbg(String label, int value) {
+        Dbg(label, value, false);
     }
-    public void Dbg(String label, float value, boolean toDriverStation=false) {
-        Dbg(label, value.toString(), toDriverStation);
+    public void Dbg(String label, double value, boolean toDriverStation)
+    {
+        Dbg(label, Double.toString(value), toDriverStation);
+    }
+    public void Dbg(String label, double value) {
+        Dbg(label, value, false);
+    }
+    public void Dbg(String label, float value, boolean toDriverStation) {
+        Dbg(label, Float.toString(value), toDriverStation);
+    }
+    public void Dbg(String label, float value) {
+        Dbg(label, value, false);
     }
     public void Dbg(String label) {
         System.out.println(label);
     }
-    public void Dbg(String label, String value, boolean toDriverStation=false) {
+    public void Dbg(String label, String value, boolean toDriverStation) {
         if (toDriverStation) {
             callingOpMode.telemetry.addData(label, value);
             callingOpMode.telemetry.update();
@@ -455,7 +467,10 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         System.out.println(label + " = " + value);
         
         // TODO: Also output to a log file on the phone?
-    }    
+    }
+    public void Dbg(String label, String value) {
+        Dbg(label, value, false);
+    }
 
     public void turn(float turnHeading)throws InterruptedException { turn(turnHeading, turnSpeed); }
 
@@ -533,12 +548,13 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         callingOpMode.sleep(500);
 
         reloader.setPosition(RELOADER_MID);
-        callingOpMode.sleep(500);
+        callingOpMode.sleep(500);*/
+
         target = motorShooter.getCurrentPosition() + 1600;
         motorShooter.setPower(0.5);
         while (motorShooter.getCurrentPosition() < target) callingOpMode.sleep(1);
         motorShooter.setPower(0);
-        callingOpMode.sleep(250);*/
+        callingOpMode.sleep(250);
     }
 
     @Override
