@@ -316,6 +316,26 @@ public class RobotBasePrototype implements AstroRobotBaseInterface, SensorEventL
 
     }
 
+    @Override
+    public void teleopUpdateLifter(float left_stick, float right_stick) {
+
+    }
+
+    @Override
+    public void grabberOutREPLACE(boolean a) {
+
+    }
+
+    @Override
+    public void grabberMidREPLACE(boolean x) {
+
+    }
+
+    @Override
+    public void grabberInREPLACE(boolean b) {
+
+    }
+
     // Normalize the angle to be between 0 and 360
     public float normalize360(float val) {
         while (val > 360 || val < 0) {

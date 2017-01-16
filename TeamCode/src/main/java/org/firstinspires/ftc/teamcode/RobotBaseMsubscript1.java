@@ -348,6 +348,26 @@ public class RobotBaseMsubscript1 implements AstroRobotBaseInterface{
 
     }
 
+    @Override
+    public void teleopUpdateLifter(float left_stick, float right_stick) {
+
+    }
+
+    @Override
+    public void grabberOutREPLACE(boolean a) {
+
+    }
+
+    @Override
+    public void grabberMidREPLACE(boolean x) {
+
+    }
+
+    @Override
+    public void grabberInREPLACE(boolean b) {
+
+    }
+
     public void turn(float turnHeading)throws InterruptedException { turn(turnHeading, turnSpeed); }
 
     public void turn(float turnHeading, double power)throws InterruptedException{
