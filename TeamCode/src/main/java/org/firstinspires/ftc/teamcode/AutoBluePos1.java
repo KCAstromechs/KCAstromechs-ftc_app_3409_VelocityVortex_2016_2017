@@ -41,18 +41,12 @@ public class AutoBluePos1 extends LinearOpMode {
             }
         }
 
-        robotBase.turn(145);
-        robotBase.turn(270);
+        robotBase.turn(300);
         //TODO: test shooting
         robotBase.hanShotFirst();
-        robotBase.turn(250); //twist robot to shake second ball down
-        robotBase.turn(270);
         robotBase.hanShotFirst();
-        if(opModeIsActive()){
-            sleep(4000);
-        }
         robotBase.turn(0);
-        robotBase.driveStraight(44, 0);
+        robotBase.driveStraight(45, 0);
 
         robotBase.turn(90);
         pos = robotBase.takePicture();
@@ -61,10 +55,10 @@ public class AutoBluePos1 extends LinearOpMode {
 
         //push chosen button
         if (pos == 1){
-            robotBase.turn(100);
-            try {robotBase.pushButton(100, 2);}
+            robotBase.turn(108);
+            try {robotBase.pushButton(108, 2);}
             catch (TimeoutException e) {
-                robotBase.driveStraight(-12, -0.5, 100);
+                robotBase.driveStraight(-12, -0.5, 108);
             }
         }
         else if (pos == 2) {

@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import java.sql.Time;
+
 @Autonomous(name="Red Pos 1", group="Red")
 public class AutoRedPos1 extends LinearOpMode {
 
@@ -15,7 +17,6 @@ public class AutoRedPos1 extends LinearOpMode {
         robotBase.init(hardwareMap);
         int pos;
         waitForStart();
-
         robotBase.driveStraight(31, 0);
         robotBase.turn(310);
         robotBase.driveStraight(20, 310);
@@ -26,21 +27,28 @@ public class AutoRedPos1 extends LinearOpMode {
 
         System.out.println(pos);
 
-        if (pos == 2){
-            robotBase.turn(280);
-            robotBase.pushButton(280);
+        if (pos == 1){
+            try {
+                robotBase.pushButton(270, 2);
+            }
+            catch (TimeoutException e) {
+                robotBase.driveStraight(-12, -0.5, 270);
+            }
         }
-        else if (pos == 1) {
-            robotBase.pushButton(270);
+        else if (pos == 2) {
+            robotBase.turn(280);
+            try {robotBase.pushButton(280, 2);}
+            catch (TimeoutException e) {
+                robotBase.driveStraight(-12, -0.5, 280);
+            }
         }
 
-        robotBase.turn(180);
         robotBase.turn(90);
-        if(opModeIsActive()){
-            sleep(4000);
-        }
+        //TODO: test shooting
+        robotBase.hanShotFirst();
+        robotBase.hanShotFirst();
         robotBase.turn(0);
-        robotBase.driveStraight(44, 0);
+        robotBase.driveStraight(45, 0);
 
         robotBase.turn(270);
         pos = robotBase.takePicture();
@@ -48,12 +56,18 @@ public class AutoRedPos1 extends LinearOpMode {
         System.out.println(pos);
 
         //push chosen button
-        if (pos == 2){
-            robotBase.turn(280);
-            robotBase.pushButton(280);
+        if (pos == 1){
+            try {robotBase.pushButton(270, 2);}
+            catch (TimeoutException e) {
+                robotBase.driveStraight(-12, -0.5, 270);
+            }
         }
-        else if (pos == 1) {
-            robotBase.pushButton(270);
+        else if (pos == 2) {
+            robotBase.turn(288);
+            try {robotBase.pushButton(288, 2);}
+            catch (TimeoutException e) {
+                robotBase.driveStraight(-12, -0.5, 288);
+            }
         }
 
         robotBase.deconstruct();

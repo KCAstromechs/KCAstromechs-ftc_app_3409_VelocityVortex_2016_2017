@@ -145,6 +145,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackRight = hwMap.dcMotor.get("backRight");
         //motorLifter = hwMap.dcMotor.get("lifter");
         motorShooter = hwMap.dcMotor.get("shooter");
+        motorSpinner = hwMap.dcMotor.get("spinner");
 
         encoderMotor = hwMap.dcMotor.get("frontLeft");
 
@@ -546,22 +547,13 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     }
 
     public void hanShotFirst() throws InterruptedException {
-        /*reloader.setPosition(RELOADER_UP);
-        callingOpMode.sleep(500);
-        reloader.setPosition((((RELOADER_UP-RELOADER_MID)/4)*3)+RELOADER_MID);
-        callingOpMode.sleep(500);
-        reloader.setPosition(((RELOADER_UP-RELOADER_MID)/2)+RELOADER_MID);
-        callingOpMode.sleep(500);
-        reloader.setPosition(((RELOADER_UP-RELOADER_MID)/4)+RELOADER_MID);
-        callingOpMode.sleep(500);
-
-        reloader.setPosition(RELOADER_MID);
-        callingOpMode.sleep(500);*/
-
         target = motorShooter.getCurrentPosition() + 1600;
         motorShooter.setPower(0.5);
         while (motorShooter.getCurrentPosition() < target) callingOpMode.sleep(1);
         motorShooter.setPower(0);
+        motorSpinner.setPower(-0.5);
+        callingOpMode.sleep(1000);
+        motorSpinner.setPower(0);
         callingOpMode.sleep(250);
     }
 

@@ -292,7 +292,7 @@ public class RobotBasePrototype implements AstroRobotBaseInterface, SensorEventL
     }
 
     @Override
-    public void pushButton(int heading) throws InterruptedException {
+    public void pushButton(int heading, double timeOutSec) throws InterruptedException, TimeoutException {
 
     }
 

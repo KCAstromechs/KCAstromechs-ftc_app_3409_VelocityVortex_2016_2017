@@ -324,9 +324,10 @@ public class RobotBaseMsubscript1 implements AstroRobotBaseInterface{
     }
 
     @Override
-    public void pushButton(int heading) throws InterruptedException {
+    public void pushButton(int heading, double timeOutSec) throws InterruptedException, TimeoutException {
 
     }
+
 
     @Override
     public void deconstruct() {
