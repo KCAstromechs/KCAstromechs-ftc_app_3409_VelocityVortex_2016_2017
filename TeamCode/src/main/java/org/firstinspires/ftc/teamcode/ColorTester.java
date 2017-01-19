@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import android.graphics.Color;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.vuforia.Image;
 import com.vuforia.PIXEL_FORMAT;
@@ -12,8 +13,7 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 import java.nio.ByteBuffer;
-
-
+@Disabled
 @Autonomous(name="ColorTester", group="ColorTest")
 public class ColorTester extends LinearOpMode {
 

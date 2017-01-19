@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-@Autonomous(name="Blue Pos 1", group="Blue")
+@Autonomous(name="BeaconAutoBlue", group="Blue")
 public class AutoBluePos1 extends LinearOpMode {
 
     AstroRobotBaseInterface robotBase;

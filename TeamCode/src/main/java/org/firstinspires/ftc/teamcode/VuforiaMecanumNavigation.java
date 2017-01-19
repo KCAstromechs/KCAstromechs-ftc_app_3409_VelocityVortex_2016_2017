@@ -30,6 +30,7 @@ import java.util.List;
  * <p>
  * Enables control of the robot via the gamepad
  */
+@Disabled
 @TeleOp(name="VuforiaMecanumNavigation")
 public class VuforiaMecanumNavigation extends OpMode {
 

@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 import java.nio.ByteBuffer;
-
+@Disabled
 @TeleOp(name="VuforiaTest", group="Vuforia")
 public class EuphoriaTesting extends LinearOpMode {
 

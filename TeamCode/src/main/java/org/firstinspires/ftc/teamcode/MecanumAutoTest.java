@@ -62,7 +62,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Disabled
 @Autonomous(name="Mecanum Auto Test Sprint 2", group ="Test")
 public class MecanumAutoTest extends LinearOpMode {
 

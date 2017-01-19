@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.hardware.IrSeekerSensor;
  * <p>
  * Enables control of the robot via the gamepad
  */
+@Disabled
 @TeleOp(name="Mecanum Teleop IR")
 public class MecanumIRTest extends OpMode {
 
