@@ -9,6 +9,14 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
  * Created by Kevin on 1/7/2016.
  */
 public interface AstroRobotBaseInterface {
+    float getZRotation();
+    double getLastPicBeaconAvg();
+
+    final int PIXELS_PER_INCH = 35;
+
+    final int PIXELS_PER_DEGREE = 22;
+
+    double lastPicBeaconAvg =0;
 
     void initCallingOpMode(LinearOpMode _callingOpMode);
 
@@ -34,7 +42,7 @@ public interface AstroRobotBaseInterface {
 
     void outputZAxis() throws InterruptedException;
 
-    void pushButton (int heading, double timeOutSec) throws InterruptedException, TimeoutException;
+    void pushButton (int heading, int outHeading, double timeOutSec) throws InterruptedException, TimeoutException;
 
     void deconstruct();
 

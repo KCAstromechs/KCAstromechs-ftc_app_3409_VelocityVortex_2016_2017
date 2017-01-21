@@ -16,60 +16,101 @@ public class AutoRedPos1 extends LinearOpMode {
         robotBase.initCallingOpMode(this);
         robotBase.init(hardwareMap);
         int pos;
+        double shiftedAvg;
+        double deltaX;
+        double correctionAngle;
         waitForStart();
-        robotBase.driveStraight(31, 0);
-        robotBase.turn(310);
-        robotBase.driveStraight(20, 310);
 
+        //initial drive
+        robotBase.driveStraight(21, 0);
+
+        //turns parallel to ramp
+        robotBase.turn(322);
+
+        //second drive to align the robot to the first beacon one one axis
+        robotBase.driveStraight(29.6,322);
+
+        //turns robot to face beacon
         robotBase.turn(270);
 
+        //waits for robot to come to rest, then takes picture to determine beacon orientation
+        sleep(500);
         pos = robotBase.takePicture();
 
-        System.out.println(pos);
+        //do some math to determine the angle the robot should drive to the beacon with
+        shiftedAvg = ((270 - robotBase.getZRotation()) * robotBase.PIXELS_PER_DEGREE) + robotBase.getLastPicBeaconAvg();
+        deltaX = (340 - shiftedAvg)/robotBase.PIXELS_PER_INCH;
+        correctionAngle = Math.toDegrees(Math.atan(deltaX/30.));
 
+        //outputs beacon info for testing purposes
+        System.out.println("Beginning first beacon");
+        System.out.println(pos);
+        System.out.println("px per degree: " + robotBase.PIXELS_PER_DEGREE);
+        System.out.println("lastPicBeaconAvg: " + robotBase.getLastPicBeaconAvg());
+        System.out.println("zRotation: " + robotBase.getZRotation());
+        System.out.println("shiftedAvg: " + shiftedAvg);
+        System.out.println("deltaX: " + deltaX);
+        System.out.println("correctionAngle: " + correctionAngle);
+
+        //if statement drives to the correct side of the beacon depending on the beacon orientation, then drives backwards away from beacon
         if (pos == 1){
             try {
-                robotBase.pushButton(270, 2);
+                robotBase.pushButton(270 + (int)correctionAngle, 270, 2);
             }
             catch (TimeoutException e) {
                 robotBase.driveStraight(-12, -0.5, 270);
             }
         }
         else if (pos == 2) {
-            robotBase.turn(280);
-            try {robotBase.pushButton(280, 2);}
+            robotBase.turn(280 + (float)correctionAngle);
+            try {robotBase.pushButton(280 + (int)correctionAngle, 280, 2);}
             catch (TimeoutException e) {
                 robotBase.driveStraight(-12, -0.5, 280);
             }
         }
 
+        //turns to position the robot for shooting
         robotBase.turn(90);
-        //TODO: test shooting
+
+        //takes two shots into the center vortex
         robotBase.hanShotFirst();
         robotBase.hanShotFirst();
+
+        //begins journey to second beacon
         robotBase.turn(0);
         robotBase.driveStraight(45, 0);
 
+        //turns to face second beacon
         robotBase.turn(270);
+
+        //waits for robot to come to rest, then takes picture to determine beacon orientation
+        sleep(500);
         pos = robotBase.takePicture();
 
+        System.out.println("Beginning second beacon");
         System.out.println(pos);
+        System.out.println(pos);
+        System.out.println("px per degree: " + robotBase.PIXELS_PER_DEGREE);
+        System.out.println("lastPicBeaconAvg: " + robotBase.getLastPicBeaconAvg());
+        System.out.println("zRotation: " + robotBase.getZRotation());
+        System.out.println("shiftedAvg: " + shiftedAvg);
+        System.out.println("deltaX: " + deltaX);
+        System.out.println("correctionAngle: " + correctionAngle);
 
-        //push chosen button
+        //if statement drives to the correct side of the beacon depending on the beacon orientation, then drives backwards away from beacon
         if (pos == 1){
-            try {robotBase.pushButton(270, 2);}
+            try {robotBase.pushButton(270 + (int)correctionAngle, 270, 2);}
             catch (TimeoutException e) {
                 robotBase.driveStraight(-12, -0.5, 270);
             }
         }
         else if (pos == 2) {
-            robotBase.turn(288);
-            try {robotBase.pushButton(288, 2);}
+            robotBase.turn(288 + (float)correctionAngle);
+            try {robotBase.pushButton(288 + (int)correctionAngle, 288, 2);}
             catch (TimeoutException e) {
                 robotBase.driveStraight(-12, -0.5, 288);
             }
         }
-
         robotBase.deconstruct();
         robotBase = null;
     }

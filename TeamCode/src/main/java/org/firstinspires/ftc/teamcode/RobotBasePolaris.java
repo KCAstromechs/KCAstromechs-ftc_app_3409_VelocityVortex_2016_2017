@@ -82,6 +82,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     // Possible values are:  0-360
     // 0 is set as straight ahead of the robot, 90 is the right, 270 is to the left
     public float zRotation;
+    public double lastPicBeaconAvg;
 
     VuforiaLocalizer vuforia;
 
@@ -99,6 +100,16 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
     static final double[] scaleArray = {0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
             0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00};
+
+    @Override
+    public float getZRotation() {
+        return zRotation;
+    }
+
+    @Override
+    public double getLastPicBeaconAvg() {
+        return lastPicBeaconAvg;
+    }
 
     @Override
     public void initCallingOpMode(LinearOpMode _callingOpMode) {
@@ -397,15 +408,18 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
         xRedAvg = xRedSum / totalRed;
         xBlueAvg = xBlueSum / totalBlue;
+        lastPicBeaconAvg = (xBlueAvg + xRedAvg) / 2.0;
 
         System.out.println("xRedAvg: " + xRedAvg);
         System.out.println("xBlueAvg: " + xBlueAvg);
+        System.out.println("xAvg: " + ((xBlueAvg + xRedAvg) / 2.0));
         System.out.println("xRedSum: " + xRedSum);
         System.out.println("xBlueSum: " + xBlueSum);
         System.out.println("totalRed: " + totalRed);
         System.out.println("totalBlue: " + totalBlue);
         System.out.println("width: " + image.getWidth());
         System.out.println("height: " + image.getHeight());
+        System.out.println("heading: " + zRotation);
 
         if (!callingOpMode.opModeIsActive() || totalRed < 100 || totalBlue < 100) {
             //didn't see enough color or opmode is not active
@@ -582,7 +596,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
 
     @Override
-    public void pushButton(int heading, double timeOutSec) throws InterruptedException, TimeoutException {
+    public void pushButton(int heading, int outHeading, double timeOutSec) throws InterruptedException, TimeoutException {
         double max;
         double error;
         double correction;
@@ -653,7 +667,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        driveStraight(-12, -0.5, heading);
+        driveStraight(-12, -0.5, outHeading);
     }
 
     @Override
@@ -690,13 +704,9 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     }
 
     @Override
-    public void teleopUpdateDrive(float left_stick, float right_stick){
-        float left;
-        float right;
+    public void teleopUpdateDrive(float left, float right){
         // tank drive
         // note that if y equal -1 then joystick is pushed all of the way forward.
-        left = left_stick;
-        right = right_stick;
 
         // clip the right/left values so that the values never exceed +/- 1
         right = Range.clip(right, -1, 1);
@@ -758,14 +768,9 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     }
 
     @Override
-    public void teleopUpdateLifter(float left_stick, float right_stick){
-        float left;
-        float right;
-        // tank drive
+    public void teleopUpdateLifter(float left, float right){
+         // tank drive
         // note that if y equal -1 then joystick is pushed all of the way forward.
-        left = left_stick;
-        right = right_stick;
-
         // clip the right/left values so that the values never exceed +/- 1
         right = Range.clip(right, -1, 1);
         left = Range.clip(left, -1, 1);

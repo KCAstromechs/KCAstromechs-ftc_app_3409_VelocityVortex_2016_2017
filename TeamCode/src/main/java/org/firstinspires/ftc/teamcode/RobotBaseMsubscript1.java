@@ -324,6 +324,10 @@ public class RobotBaseMsubscript1 implements AstroRobotBaseInterface{
     }
 
     @Override
+    public void pushButton(int heading, int outHeading, double timeOutSec) throws InterruptedException, TimeoutException {
+
+    }
+
     public void pushButton(int heading, double timeOutSec) throws InterruptedException, TimeoutException {
 
     }
@@ -435,9 +439,14 @@ public class RobotBaseMsubscript1 implements AstroRobotBaseInterface{
     }
 
 
-    private float getZRotation() {
+    public float getZRotation() {
 
         return gyro.getHeading();
         //return zRotation;
+    }
+
+    @Override
+    public double getLastPicBeaconAvg() {
+        return 0;
     }
 }

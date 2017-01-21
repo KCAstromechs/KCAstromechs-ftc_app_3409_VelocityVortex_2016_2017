@@ -67,6 +67,16 @@ public class RobotBasePrototype implements AstroRobotBaseInterface, SensorEventL
     RobotBasePrototype(LinearOpMode _callingOpMode){callingOpMode=_callingOpMode;}
 
     @Override
+    public float getZRotation() {
+        return 0;
+    }
+
+    @Override
+    public double getLastPicBeaconAvg() {
+        return 0;
+    }
+
+    @Override
     public void initCallingOpMode(LinearOpMode _callingOpMode) {
 
     }
@@ -292,6 +302,10 @@ public class RobotBasePrototype implements AstroRobotBaseInterface, SensorEventL
     }
 
     @Override
+    public void pushButton(int heading, int outHeading, double timeOutSec) throws InterruptedException, TimeoutException {
+
+    }
+
     public void pushButton(int heading, double timeOutSec) throws InterruptedException, TimeoutException {
 
     }
