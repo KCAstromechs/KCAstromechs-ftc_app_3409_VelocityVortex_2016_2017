@@ -18,10 +18,10 @@ public class PolarisAutoShoot extends LinearOpMode {
 
         robotBase.resetGyro();
 
-        robotBase.driveStraight(16, 0);
+        robotBase.driveStraight(20, 0);
         robotBase.hanShotFirst();
         robotBase.hanShotFirst();
-        robotBase.driveStraight(42, 0);
+        //robotBase.driveStraight(45, 0);
 
     }
 

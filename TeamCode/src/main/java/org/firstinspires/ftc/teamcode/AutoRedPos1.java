@@ -31,7 +31,7 @@ public class AutoRedPos1 extends LinearOpMode {
         robotBase.driveStraight(29.6,322);
 
         //turns robot to face beacon
-        robotBase.turn(270);
+        robotBase.turn(275);
 
         //waits for robot to come to rest, then takes picture to determine beacon orientation
         sleep(500);
@@ -52,6 +52,9 @@ public class AutoRedPos1 extends LinearOpMode {
         System.out.println("deltaX: " + deltaX);
         System.out.println("correctionAngle: " + correctionAngle);
 
+        telemetry.addData("",pos);
+        telemetry.update();
+
         //if statement drives to the correct side of the beacon depending on the beacon orientation, then drives backwards away from beacon
         if (pos == 1){
             try {
@@ -70,7 +73,7 @@ public class AutoRedPos1 extends LinearOpMode {
         }
 
         //turns to position the robot for shooting
-        robotBase.turn(90);
+        robotBase.turn(115);
 
         //takes two shots into the center vortex
         robotBase.hanShotFirst();
@@ -81,7 +84,7 @@ public class AutoRedPos1 extends LinearOpMode {
         robotBase.driveStraight(45, 0);
 
         //turns to face second beacon
-        robotBase.turn(270);
+        robotBase.turn(275);
 
         //waits for robot to come to rest, then takes picture to determine beacon orientation
         sleep(500);
@@ -96,6 +99,9 @@ public class AutoRedPos1 extends LinearOpMode {
         System.out.println("shiftedAvg: " + shiftedAvg);
         System.out.println("deltaX: " + deltaX);
         System.out.println("correctionAngle: " + correctionAngle);
+
+        telemetry.addData("",pos);
+        telemetry.update();
 
         //if statement drives to the correct side of the beacon depending on the beacon orientation, then drives backwards away from beacon
         if (pos == 1){

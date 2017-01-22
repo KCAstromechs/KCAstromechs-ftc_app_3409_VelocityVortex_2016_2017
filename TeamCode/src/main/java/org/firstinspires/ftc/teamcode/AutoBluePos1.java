@@ -47,6 +47,9 @@ public class AutoBluePos1 extends LinearOpMode {
         System.out.println("deltaX: " + deltaX);
         System.out.println("correctionAngle: " + correctionAngle);
 
+        telemetry.addData("",pos);
+        telemetry.update();
+
         System.out.println(pos);
 
         if (pos == 1){
@@ -76,7 +79,8 @@ public class AutoBluePos1 extends LinearOpMode {
         sleep(500);
         pos = robotBase.takePicture();
 
-        System.out.println(pos);
+        telemetry.addData("",pos);
+        telemetry.update();
 
         //push chosen button
         if (pos == 1){

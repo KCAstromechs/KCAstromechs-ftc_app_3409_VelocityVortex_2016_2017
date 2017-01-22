@@ -44,7 +44,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double driveSpeed = 0.75;     // Default drive speed for better accuracy.
-    static final double turnSpeed = 0.5;      // Default turn speed for better accuracy.
+    static final double turnSpeed = 0.65;      // Default turn speed for better accuracy.
     static final double P_DRIVE_COEFF = 0.1;    // Larger is more responsive, but also less stable
     static final double RELEASE_UP = 0.75;
     static final double RELEASE_DOWN = 0;
@@ -243,7 +243,6 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         double correction;
         double leftPower;
         double rightPower;
-        long counter = 0;
 
         target = (int) (inches * COUNTS_PER_INCH);
 
@@ -287,16 +286,6 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             motorBackLeft.setPower(leftPower);
             motorBackRight.setPower(rightPower);
 
-            counter++;
-
-            // Display drive status for the driver.
-            callingOpMode.telemetry.addData("Err/St", "%5.1f/%5.1f", error, correction);
-            callingOpMode.telemetry.addData("Target", "%7d", target);
-            callingOpMode.telemetry.addData("Actual", "%7d:%7d", motorFrontLeft.getCurrentPosition(),
-                    motorFrontRight.getCurrentPosition());
-            callingOpMode.telemetry.addData("Speed", "%5.2f:%5.2f", leftPower, rightPower);
-            callingOpMode.telemetry.addData("Counter ", counter);
-            callingOpMode.telemetry.update();
 
             callingOpMode.idle();
         }
@@ -410,16 +399,16 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         xBlueAvg = xBlueSum / totalBlue;
         lastPicBeaconAvg = (xBlueAvg + xRedAvg) / 2.0;
 
-        System.out.println("xRedAvg: " + xRedAvg);
-        System.out.println("xBlueAvg: " + xBlueAvg);
-        System.out.println("xAvg: " + ((xBlueAvg + xRedAvg) / 2.0));
-        System.out.println("xRedSum: " + xRedSum);
-        System.out.println("xBlueSum: " + xBlueSum);
-        System.out.println("totalRed: " + totalRed);
-        System.out.println("totalBlue: " + totalBlue);
-        System.out.println("width: " + image.getWidth());
-        System.out.println("height: " + image.getHeight());
-        System.out.println("heading: " + zRotation);
+        callingOpMode.telemetry.addData("xRedAvg: " , xRedAvg);
+        callingOpMode.telemetry.addData("xBlueAvg: " , xBlueAvg);
+        callingOpMode.telemetry.addData("xAvg: " , ((xBlueAvg + xRedAvg) / 2.0));
+        callingOpMode.telemetry.addData("xRedSum: " , xRedSum);
+        callingOpMode.telemetry.addData("xBlueSum: " , xBlueSum);
+        callingOpMode.telemetry.addData("totalRed: " , totalRed);
+        callingOpMode.telemetry.addData("totalBlue: " , totalBlue);
+        callingOpMode.telemetry.addData("width: " , image.getWidth());
+        callingOpMode.telemetry.addData("height: " , image.getHeight());
+        callingOpMode.telemetry.addData("heading: " , zRotation);
 
         if (!callingOpMode.opModeIsActive() || totalRed < 100 || totalBlue < 100) {
             //didn't see enough color or opmode is not active
