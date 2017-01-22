@@ -56,7 +56,7 @@ public class AutoRedPos1 extends LinearOpMode {
         telemetry.update();
 
         //if statement drives to the correct side of the beacon depending on the beacon orientation, then drives backwards away from beacon
-        if (pos == 1){
+        if (pos == RobotBasePolaris.BEACON_RED_BLUE){
             try {
                 robotBase.pushButton(270 + (int)correctionAngle, 270, 2);
             }
@@ -64,7 +64,7 @@ public class AutoRedPos1 extends LinearOpMode {
                 robotBase.driveStraight(-12, -0.5, 270);
             }
         }
-        else if (pos == 2) {
+        else if (pos == RobotBasePolaris.BEACON_BLUE_RED) {
             robotBase.turn(280 + (float)correctionAngle);
             try {robotBase.pushButton(280 + (int)correctionAngle, 280, 2);}
             catch (TimeoutException e) {
@@ -104,13 +104,13 @@ public class AutoRedPos1 extends LinearOpMode {
         telemetry.update();
 
         //if statement drives to the correct side of the beacon depending on the beacon orientation, then drives backwards away from beacon
-        if (pos == 1){
+        if (pos == RobotBasePolaris.BEACON_RED_BLUE){
             try {robotBase.pushButton(270 + (int)correctionAngle, 270, 2);}
             catch (TimeoutException e) {
                 robotBase.driveStraight(-12, -0.5, 270);
             }
         }
-        else if (pos == 2) {
+        else if (pos == RobotBasePolaris.BEACON_BLUE_RED) {
             robotBase.turn(288 + (float)correctionAngle);
             try {robotBase.pushButton(288 + (int)correctionAngle, 288, 2);}
             catch (TimeoutException e) {

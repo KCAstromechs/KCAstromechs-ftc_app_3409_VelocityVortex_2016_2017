@@ -46,12 +46,10 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     static final double driveSpeed = 0.75;     // Default drive speed for better accuracy.
     static final double turnSpeed = 0.65;      // Default turn speed for better accuracy.
     static final double P_DRIVE_COEFF = 0.1;    // Larger is more responsive, but also less stable
-    static final double RELEASE_UP = 0.75;
-    static final double RELEASE_DOWN = 0;
-    static final double RELOADER_UP = 0.95;
-    static final double RELOADER_MID = 0.5;
-    static final double RELOADER_DOWN = 0.2;
 
+    //defines orientation constants for beacons
+    static final int BEACON_BLUE_RED = 1;
+    static final int BEACON_RED_BLUE = 2;
 
     float zero;
 
@@ -66,9 +64,9 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     public DcMotor motorSpinner     = null;
     public Servo   leftGrabber      = null;
     public Servo   rightGrabber     = null;
-    public TouchSensor touch        = null;
+    public TouchSensor touchPow     = null;
+    public TouchSensor touchShooter = null;
     public boolean hasBeenZeroed= false;
-
 
     public ModernRoboticsI2cGyro gyro = null;
 
@@ -89,6 +87,8 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     boolean spinToggle = false;
 
     boolean shooterIsBusy = false;
+
+    boolean shooterIsResetting = false;
 
     final float SHOOT_SPEED = 1.0f;
     int rotation;
@@ -178,7 +178,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
-        touch = hwMap.touchSensor.get("touch");
+        touchPow = hwMap.touchSensor.get("touch");
 
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -611,7 +611,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackLeft.setPower(power);
         motorBackRight.setPower(power);
         initialTime = System.currentTimeMillis();
-        while (!touch.isPressed() && callingOpMode.opModeIsActive() && (System.currentTimeMillis() - initialTime <= timeOutSec )) {
+        while (!touchPow.isPressed() && callingOpMode.opModeIsActive() && (System.currentTimeMillis() - initialTime <= timeOutSec )) {
             error = heading - zRotation;
             while (error > 180) error = -(error - 360);
             while (error <= -180) error = -(error + 360);
@@ -716,9 +716,13 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     }
 
     @Override
-    public void shooterHandler(boolean y, boolean lb){
+    public void shooterHandler(boolean y, boolean lb) {
+        
+    }
 
-        if(motorShooter.getCurrentPosition()>target || !shooterIsBusy ) {
+    public void shooterHandler(boolean y, boolean lb, boolean rb){
+
+        if((motorShooter.getCurrentPosition() > target || !shooterIsBusy) && !shooterIsResetting) {
             shooterIsBusy=false;
             if (y) {
                 target=motorShooter.getCurrentPosition()+1600;
@@ -726,9 +730,15 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
                 shooterIsBusy=true;
             } else if (lb) {
                 motorShooter.setPower(0.5);
+            } else if (rb){
+                motorShooter.setPower(0.5);
+                shooterIsResetting = true;
             } else {
                 motorShooter.setPower(0);
             }
+        } else if (shooterIsResetting && touchShooter.isPressed()){
+            motorShooter.setPower(0);
+            shooterIsResetting = false;
         }
     }
 

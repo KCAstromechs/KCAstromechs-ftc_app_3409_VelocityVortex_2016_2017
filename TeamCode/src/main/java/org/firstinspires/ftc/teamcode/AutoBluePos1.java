@@ -52,7 +52,7 @@ public class AutoBluePos1 extends LinearOpMode {
 
         System.out.println(pos);
 
-        if (pos == 1){
+        if (pos == RobotBasePolaris.BEACON_RED_BLUE){
             robotBase.turn(100 +(float)correctionAngle);
             try {
                 robotBase.pushButton(100 + (int)correctionAngle, 100, 2);
@@ -61,7 +61,7 @@ public class AutoBluePos1 extends LinearOpMode {
                 robotBase.driveStraight(-12, -0.5, 100);
             }
         }
-        else if (pos == 2) {
+        else if (pos == RobotBasePolaris.BEACON_BLUE_RED) {
             try {robotBase.pushButton(90 + (int)correctionAngle, 90, 2);}
             catch (TimeoutException e) {
                 robotBase.driveStraight(-12, -0.5, 90);
@@ -83,14 +83,14 @@ public class AutoBluePos1 extends LinearOpMode {
         telemetry.update();
 
         //push chosen button
-        if (pos == 1){
+        if (pos == RobotBasePolaris.BEACON_RED_BLUE){
             robotBase.turn(108 + (float)correctionAngle);
             try {robotBase.pushButton(108 + (int)correctionAngle, 108, 2);}
             catch (TimeoutException e) {
                 robotBase.driveStraight(-12, -0.5, 108);
             }
         }
-        else if (pos == 2) {
+        else if (pos == RobotBasePolaris.BEACON_BLUE_RED) {
             try {robotBase.pushButton(90 + (int)correctionAngle, 90, 2);}
             catch (TimeoutException e) {
                 robotBase.driveStraight(-12, -0.5, 90);
