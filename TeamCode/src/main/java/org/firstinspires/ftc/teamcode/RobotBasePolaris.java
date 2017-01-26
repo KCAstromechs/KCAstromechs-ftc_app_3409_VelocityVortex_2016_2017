@@ -48,10 +48,16 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     static final double P_DRIVE_COEFF = 0.1;    // Larger is more responsive, but also less stable
 
     //defines orientation constants for beacons
-    static final int BEACON_BLUE_RED = 1;
-    static final int BEACON_RED_BLUE = 2;
+    static final int BEACON_BLUE_RED = 2;
+    static final int BEACON_RED_BLUE = 1;
 
     float zero;
+    float rawGyro;
+
+    float[] rotationMatrix = new float[9];
+    float[] orientation = new float[3];
+
+
 
     public DcMotor motorFrontLeft = null;
     public DcMotor motorBackLeft = null;
@@ -127,6 +133,8 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorShooter = hwMap.dcMotor.get("shooter");
         motorLifterLeft = hwMap.dcMotor.get("lifterLeft");
         motorLifterRight = hwMap.dcMotor.get("lifterRight");
+        touchShooter = hwMap.touchSensor.get("touchShooter");
+
 
         leftGrabber = hwMap.servo.get("leftGrabber");
         rightGrabber = hwMap.servo.get("rightGrabber");
@@ -157,6 +165,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         //motorLifter = hwMap.dcMotor.get("lifter");
         motorShooter = hwMap.dcMotor.get("shooter");
         motorSpinner = hwMap.dcMotor.get("spinner");
+        touchShooter = hwMap.touchSensor.get("touchShooter");
 
         encoderMotor = hwMap.dcMotor.get("frontLeft");
 
@@ -179,7 +188,6 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
         // Define and initialize ALL installed servos.
         touchPow = hwMap.touchSensor.get("touch");
-
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -307,6 +315,76 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     }
 
     public int takePicture() throws InterruptedException {
+/*        int thisR, thisB, thisG;
+        int xRedAvg = 0;
+        int xBlueAvg = 0;
+        int totalBlue = 1;
+        int totalRed = 1;
+        int xRedSum = 0;
+        int xBlueSum = 0;
+        int idx = 0;
+        float[] hsv = new float[3];
+        float thisH;
+
+        VuforiaLocalizer.CloseableFrame frame = vuforia.getFrameQueue().take();
+        for (int i = 0; i < frame.getNumImages(); i++) {
+            if (frame.getImage(i).getFormat() == PIXEL_FORMAT.RGB888) {
+                idx = i;
+                break;
+            }
+        }
+
+        Image image = frame.getImage(idx);
+        ByteBuffer px = image.getPixels();
+
+        for (int i = 0; i < image.getHeight(); i++) {
+            for (int j = 0; j < image.getWidth(); j++) {
+
+                thisR = px.get() & 0xFF;
+                thisG = px.get() & 0xFF;
+                thisB = px.get() & 0xFF;
+
+                if (thisB > 230 || thisG > 230 || thisR > 230) {
+
+                    Color.RGBToHSV(thisR, thisG, thisB, hsv);
+
+                    thisH = hsv[0];
+
+                    //We now have the colors (one byte each) for any pixel, (j, i)
+                    if (thisH <= 220 && thisH >= 180) {
+                        totalBlue++;
+                        xBlueSum += i;
+                    } else if (thisH <= 360 && thisH >= 330) {
+                        totalRed++;
+                        xRedSum += i;
+                    }
+                }
+            }
+        }
+
+        xRedAvg = xRedSum / totalRed;
+        xBlueAvg = xBlueSum / totalBlue;
+
+        System.out.println("");
+        System.out.println("width=" + image.getWidth());
+        System.out.println("height=" + image.getHeight());
+        System.out.println("totalRed=" + totalRed);
+        System.out.println("totalBlue=" + totalBlue);
+        System.out.println("xRedSum=" + xRedSum);
+        System.out.println("xBlueSum=" + xBlueSum);
+        System.out.println("xRedAvg=" + xRedAvg);
+        System.out.println("xBlueAvg=" + xBlueAvg);
+
+        if (totalBlue < 1000 || totalRed < 1000){
+            return 0;
+        } else if (xRedAvg > xBlueAvg) {
+            return 1;
+        } else if (xBlueAvg > xRedAvg) {
+            return 2;
+        } else {
+            return 0;
+        }
+*/
         int thisR, thisB, thisG;
         int xRedAvg = 0;
         int xBlueAvg = 0;
@@ -424,6 +502,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             //don't understand
             return 0;
         }
+
     }
 
     @Override
@@ -550,9 +629,14 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     }
 
     public void hanShotFirst() throws InterruptedException {
-        target = motorShooter.getCurrentPosition() + 1600;
+//        target = motorShooter.getCurrentPosition() + 1600;
         motorShooter.setPower(0.5);
-        while (motorShooter.getCurrentPosition() < target) callingOpMode.sleep(1);
+        while(!touchShooter.isPressed()) {
+            callingOpMode.sleep(1);
+        }
+
+
+//        while (motorShooter.getCurrentPosition() < target) callingOpMode.sleep(1);
         motorShooter.setPower(0);
         motorSpinner.setPower(-0.5);
         callingOpMode.sleep(1000);
@@ -562,13 +646,11 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        float[] rotationMatrix = new float[9];
         SensorManager.getRotationMatrixFromVector(rotationMatrix, sensorEvent.values);
-        float[] orientation = new float[3];
         SensorManager.getOrientation(rotationMatrix, orientation);
 //        Dbg("orientation: " , orientation[0], false);
 
-        float rawGyro = (float) Math.toDegrees(orientation[0]);
+        rawGyro = (float) Math.toDegrees(orientation[0]);
         if (!hasBeenZeroed) {
             hasBeenZeroed = true;
             zero = rawGyro;
@@ -716,22 +798,18 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     }
 
     @Override
-    public void shooterHandler(boolean y, boolean lb) {
-        
-    }
-
     public void shooterHandler(boolean y, boolean lb, boolean rb){
 
         if((motorShooter.getCurrentPosition() > target || !shooterIsBusy) && !shooterIsResetting) {
             shooterIsBusy=false;
             if (y) {
                 target=motorShooter.getCurrentPosition()+1600;
-                motorShooter.setPower(0.5);
+                motorShooter.setPower(0.7);
                 shooterIsBusy=true;
             } else if (lb) {
-                motorShooter.setPower(0.5);
+                motorShooter.setPower(0.7);
             } else if (rb){
-                motorShooter.setPower(0.5);
+                motorShooter.setPower(0.7);
                 shooterIsResetting = true;
             } else {
                 motorShooter.setPower(0);

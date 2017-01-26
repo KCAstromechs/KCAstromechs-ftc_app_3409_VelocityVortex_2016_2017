@@ -344,6 +344,10 @@ public class RobotBaseMsubscript1 implements AstroRobotBaseInterface{
     }
 
     @Override
+    public void shooterHandler(boolean y, boolean lb, boolean rb) {
+
+    }
+
     public void shooterHandler(boolean y, boolean lb) {
 
     }

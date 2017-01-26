@@ -321,6 +321,10 @@ public class RobotBasePrototype implements AstroRobotBaseInterface, SensorEventL
     }
 
     @Override
+    public void shooterHandler(boolean y, boolean lb, boolean rb) {
+
+    }
+
     public void shooterHandler(boolean y, boolean lb) {
 
     }

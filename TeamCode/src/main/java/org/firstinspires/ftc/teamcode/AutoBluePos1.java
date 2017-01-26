@@ -18,6 +18,7 @@ public class AutoBluePos1 extends LinearOpMode {
         double deltaX;
         double correctionAngle;
         waitForStart();
+
         //initial drive
         robotBase.driveStraight(25, 0);
 
