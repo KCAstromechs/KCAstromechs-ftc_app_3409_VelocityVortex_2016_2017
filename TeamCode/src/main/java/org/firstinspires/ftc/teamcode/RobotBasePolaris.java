@@ -46,6 +46,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     static final double driveSpeed = 0.75;     // Default drive speed for better accuracy.
     static final double turnSpeed = 0.65;      // Default turn speed for better accuracy.
     static final double P_DRIVE_COEFF = 0.1;    // Larger is more responsive, but also less stable
+    static final int TIMER_SHOOTER_TUNE = 150;
 
     //defines orientation constants for beacons
     static final int BEACON_BLUE_RED = 2;
@@ -796,10 +797,9 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorFrontLeft.setPower(left);
         motorBackLeft.setPower(left);
     }
-
+    long timeShooterEnded = 0;
     @Override
     public void shooterHandler(boolean y, boolean lb, boolean rb){
-
         if((motorShooter.getCurrentPosition() > target || !shooterIsBusy) && !shooterIsResetting) {
             shooterIsBusy=false;
             if (y) {
@@ -815,8 +815,8 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
                 motorShooter.setPower(0);
             }
         } else if (shooterIsResetting && touchShooter.isPressed()){
-            motorShooter.setPower(0);
-            shooterIsResetting = false;
+                motorShooter.setPower(0);
+                shooterIsResetting = false;
         }
     }
 
