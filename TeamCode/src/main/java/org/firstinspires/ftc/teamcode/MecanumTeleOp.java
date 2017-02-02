@@ -73,25 +73,25 @@ public class MecanumTeleOp extends OpMode {
 
         float left = gamepad1.left_stick_y;
         float right = -gamepad1.right_stick_y;
-        if(gamepad1.right_trigger>0.25 || gamepad1.left_trigger>0.25) {
-            if (gamepad1.right_trigger > 0.25) {
-                motorFrontRight.setPower(-1);
-                motorBackRight.setPower(1);
-                motorFrontLeft.setPower(1);
-                motorBackLeft.setPower(-1);
-            }
-
-            if (gamepad1.left_trigger > 0.25) {
-                motorFrontRight.setPower(1);
-                motorBackRight.setPower(-1);
-                motorFrontLeft.setPower(-1);
-                motorBackLeft.setPower(1);
-            }
+        float leftT = gamepad1.left_trigger;
+        float rightT = gamepad1.right_trigger;
+        if (Math.abs(left+leftT+rightT)<0.25) {
+            motorBackLeft.setPower(0);
+            motorFrontLeft.setPower(0);
         } else {
-            motorFrontRight.setPower(right);
-            motorBackRight.setPower(right);
-            motorFrontLeft.setPower(left);
-            motorBackLeft.setPower(left);
+            motorBackLeft.setPower(left-rightT+leftT);
+            if(left-rightT+leftT>1.0) motorBackLeft.setPower(1);
+            motorFrontLeft.setPower(left+rightT-leftT);
+            if(left+rightT-leftT>1.0) motorFrontLeft.setPower(1);
+        }
+        if (Math.abs(right+leftT+rightT)<0.25) {
+            motorBackRight.setPower(0);
+            motorFrontRight.setPower(0);
+        } else {
+            motorBackRight.setPower(right+rightT-leftT);
+            if(right+rightT-leftT>1.0) motorBackRight.setPower(1);
+            motorFrontRight.setPower(right-rightT+leftT);
+            if(right-rightT+leftT>1.0) motorFrontRight.setPower(1);
         }
 
     }
