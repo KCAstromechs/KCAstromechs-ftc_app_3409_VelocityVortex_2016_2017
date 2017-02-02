@@ -37,7 +37,6 @@ import android.graphics.Bitmap;
 
 import static android.content.Context.SENSOR_SERVICE;
 
-
 public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventListener {
     static final double COUNTS_PER_MOTOR_REV = 1100;    // NeveRest Motor Encoder
     static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
@@ -46,7 +45,6 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     static final double driveSpeed = 0.75;     // Default drive speed for better accuracy.
     static final double turnSpeed = 0.65;      // Default turn speed for better accuracy.
     static final double P_DRIVE_COEFF = 0.1;    // Larger is more responsive, but also less stable
-    static final int TIMER_SHOOTER_TUNE = 150;
 
     //defines orientation constants for beacons
     static final int BEACON_BLUE_RED = 2;
@@ -505,6 +503,126 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         }
 
     }
+    public int takeQuickPicture() throws InterruptedException {
+        int thisR, thisB, thisG;
+        int xRedAvg = 0;
+        int xBlueAvg = 0;
+        int totalBlue = 1;
+        int totalRed = 1;
+        int xRedSum = 0;
+        int xBlueSum = 0;
+        int idx = 0;
+        float[] hsv = new float[3];
+        float thisH;
+
+        VuforiaLocalizer.CloseableFrame frame = vuforia.getFrameQueue().take();
+        for (int i = 0; i < frame.getNumImages(); i++) {
+            if (frame.getImage(i).getFormat() == PIXEL_FORMAT.RGB888) {
+                idx = i;
+                break;
+            }
+        }
+
+        Image image = frame.getImage(idx);
+        ByteBuffer px = image.getPixels();
+
+
+        //FIRST SQUARE
+        for (int i = 910; i < 980; i++) { //actually scanning height
+            for (int j = 650; j < image.getHeight(); j++) { //actually scanning width
+
+                thisR = px.get(i*image.getWidth()+j) & 0xFF;
+                thisG = px.get(i*image.getWidth()+j+1) & 0xFF;
+                thisB = px.get(i*image.getWidth()+j+2) & 0xFF;
+
+//                if (thisB > 230 || thisG > 230 || thisR > 230) {
+
+                    Color.RGBToHSV(thisR, thisG, thisB, hsv);
+
+                    thisH = hsv[0];
+
+                    //We now have the colors (one byte each) for any pixel, (j, i)
+                    if (thisH <= 220 && thisH >= 180) {
+                        totalBlue++;
+                        xBlueSum += i;
+                    } else if (thisH <= 360 && thisH >= 330) {
+                        totalRed++;
+                        xRedSum += i;
+                    }
+//                }
+            }
+        }
+
+        xRedAvg = xRedSum / totalRed;
+        xBlueAvg = xBlueSum / totalBlue;
+
+        System.out.println("");
+        System.out.println("width = " + image.getWidth());
+        System.out.println("height = " + image.getHeight());
+        System.out.println("totalRed = " + totalRed);
+        System.out.println("totalBlue = " + totalBlue);
+        System.out.println("xRedSum = " + xRedSum);
+        System.out.println("xBlueSum = " + xBlueSum);
+        System.out.println("xRedAvg = " + xRedAvg);
+        System.out.println("xBlueAvg = " + xBlueAvg);
+
+        int w = image.getWidth();
+        int h = image.getHeight();
+
+        boolean bSavePicture = true;
+        if (bSavePicture) {
+            // Reset the pixel pointer to the start of the image
+            px = image.getPixels();
+
+            // Create a buffer to hold 32-bit image dataa and fill it
+            int bmpData[] = new int[w * h];
+            int pixel;
+            int index = 0;
+            int x,y;
+            for (y = 0; y < h; y++) {
+                for (x = 0; x < w; x++) {
+                    thisR = px.get() & 0xFF;
+                    thisG = px.get() & 0xFF;
+                    thisB = px.get() & 0xFF;
+                    bmpData[index] = Color.rgb(thisR, thisG, thisB);
+                    index++;
+                }
+            }
+
+            // Now create a bitmap object from the buffer
+            Bitmap bmp = Bitmap.createBitmap(bmpData, w, h, Bitmap.Config.ARGB_8888);
+
+            // And save the bitmap to the file system
+            // NOTE:  AndroidManifest.xml needs <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+            try {
+                //to convert Date to String, use format method of SimpleDateFormat class.
+                DateFormat dateFormat = new SimpleDateFormat("mm-dd__hh-mm-ss");
+                String strDate = dateFormat.format(new Date());
+
+                String path = Environment.getExternalStorageDirectory() + "/Snapshot__" + strDate + ".png";
+                Dbg("Snapshot filename", path);
+
+                File file = new File(path);
+                file.createNewFile();
+
+                FileOutputStream fos = new FileOutputStream(file);
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                fos.flush();
+                fos.close();
+            } catch (Exception e) {
+                Dbg("Snapshot exception", e.getStackTrace().toString());
+            }
+        }
+        if (totalBlue < 1000 || totalRed < 1000){
+            return 0;
+        } else if (xRedAvg > xBlueAvg) {
+            return BEACON_RED_BLUE;
+        } else if (xBlueAvg > xRedAvg) {
+            return BEACON_BLUE_RED;
+        } else {
+            return 0;
+        }
+    }
 
     @Override
     public void outputZAxis() throws InterruptedException {
@@ -639,7 +757,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
 //        while (motorShooter.getCurrentPosition() < target) callingOpMode.sleep(1);
         motorShooter.setPower(0);
-        motorSpinner.setPower(-0.5);
+        motorSpinner.setPower(0.5);
         callingOpMode.sleep(1000);
         motorSpinner.setPower(0);
         callingOpMode.sleep(250);
@@ -797,7 +915,6 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorFrontLeft.setPower(left);
         motorBackLeft.setPower(left);
     }
-    long timeShooterEnded = 0;
     @Override
     public void shooterHandler(boolean y, boolean lb, boolean rb){
         if((motorShooter.getCurrentPosition() > target || !shooterIsBusy) && !shooterIsResetting) {
@@ -824,7 +941,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     public void spinnerToggle(boolean a, boolean x){
         if(!spinToggle){
             if (a && released) {
-                motorSpinner.setPower(-1.0);
+                motorSpinner.setPower(1.0);
                 spinToggle = true;
                 released = false;
             } else if (!a){
