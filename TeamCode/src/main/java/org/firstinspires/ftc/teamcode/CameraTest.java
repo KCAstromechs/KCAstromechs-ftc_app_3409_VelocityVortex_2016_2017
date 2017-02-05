@@ -4,16 +4,17 @@ package org.firstinspires.ftc.teamcode;
  * Created by N2Class1 on 11/30/2016.
  */
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Environment;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -25,19 +26,16 @@ import com.vuforia.Vuforia;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
-import java.nio.ByteBuffer;
-
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import android.os.Environment;
-import android.graphics.Bitmap;
 
 import static android.content.Context.SENSOR_SERVICE;
 
-public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventListener {
+public class CameraTest implements AstroRobotBaseInterface, SensorEventListener {
     static final double COUNTS_PER_MOTOR_REV = 1100;    // NeveRest Motor Encoder
     static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
@@ -314,7 +312,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     }
 
     public int takePicture() throws InterruptedException {
-        int thisR, thisB, thisG;
+/*        int thisR, thisB, thisG;
         int xRedAvg = 0;
         int xBlueAvg = 0;
         int totalBlue = 1;
@@ -337,7 +335,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         ByteBuffer px = image.getPixels();
 
         for (int i = 0; i < image.getHeight(); i++) {
-            for (int j = 925; j < 935; j++) {
+            for (int j = 0; j < image.getWidth(); j++) {
 
                 thisR = px.get() & 0xFF;
                 thisG = px.get() & 0xFF;
@@ -383,7 +381,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         } else {
             return 0;
         }
-/*
+*/
         int thisR, thisB, thisG;
         int xRedAvg = 0;
         int xBlueAvg = 0;
@@ -500,7 +498,128 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         } else {
             //don't understand
             return 0;
-        } */
+        }
+
+    }
+    public int takeQuickPicture() throws InterruptedException {
+        int thisR, thisB, thisG;
+        int xRedAvg = 0;
+        int xBlueAvg = 0;
+        int totalBlue = 1;
+        int totalRed = 1;
+        int xRedSum = 0;
+        int xBlueSum = 0;
+        int idx = 0;
+        float[] hsv = new float[3];
+        float thisH;
+
+        VuforiaLocalizer.CloseableFrame frame = vuforia.getFrameQueue().take();
+        for (int i = 0; i < frame.getNumImages(); i++) {
+            if (frame.getImage(i).getFormat() == PIXEL_FORMAT.RGB888) {
+                idx = i;
+                break;
+            }
+        }
+
+        Image image = frame.getImage(idx);
+        ByteBuffer px = image.getPixels();
+
+
+        //FIRST SQUARE
+        for (int i = 910; i < 980; i++) { //actually scanning height
+            for (int j = 650; j < image.getHeight(); j++) { //actually scanning width
+
+                thisR = px.get(i*image.getWidth()+j) & 0xFF;
+                thisG = px.get(i*image.getWidth()+j+1) & 0xFF;
+                thisB = px.get(i*image.getWidth()+j+2) & 0xFF;
+
+//                if (thisB > 230 || thisG > 230 || thisR > 230) {
+
+                    Color.RGBToHSV(thisR, thisG, thisB, hsv);
+
+                    thisH = hsv[0];
+
+                    //We now have the colors (one byte each) for any pixel, (j, i)
+                    if (thisH <= 220 && thisH >= 180) {
+                        totalBlue++;
+                        xBlueSum += j;
+                    } else if (thisH <= 360 && thisH >= 330) {
+                        totalRed++;
+                        xRedSum += j;
+                    }
+//                }
+            }
+        }
+
+        xRedAvg = xRedSum / totalRed;
+        xBlueAvg = xBlueSum / totalBlue;
+
+        System.out.println("");
+        System.out.println("width = " + image.getWidth());
+        System.out.println("height = " + image.getHeight());
+        System.out.println("totalRed = " + totalRed);
+        System.out.println("totalBlue = " + totalBlue);
+        System.out.println("xRedSum = " + xRedSum);
+        System.out.println("xBlueSum = " + xBlueSum);
+        System.out.println("xRedAvg = " + xRedAvg);
+        System.out.println("xBlueAvg = " + xBlueAvg);
+
+        int w = image.getWidth();
+        int h = image.getHeight();
+
+        boolean bSavePicture = true;
+        if (bSavePicture) {
+            // Reset the pixel pointer to the start of the image
+            px = image.getPixels();
+
+            // Create a buffer to hold 32-bit image dataa and fill it
+            int bmpData[] = new int[w * h];
+            int pixel;
+            int index = 0;
+            int x,y;
+            for (y = 0; y < h; y++) {
+                for (x = 0; x < w; x++) {
+                    thisR = px.get() & 0xFF;
+                    thisG = px.get() & 0xFF;
+                    thisB = px.get() & 0xFF;
+                    bmpData[index] = Color.rgb(thisR, thisG, thisB);
+                    index++;
+                }
+            }
+
+            // Now create a bitmap object from the buffer
+            Bitmap bmp = Bitmap.createBitmap(bmpData, w, h, Bitmap.Config.ARGB_8888);
+
+            // And save the bitmap to the file system
+            // NOTE:  AndroidManifest.xml needs <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+            try {
+                //to convert Date to String, use format method of SimpleDateFormat class.
+                DateFormat dateFormat = new SimpleDateFormat("mm-dd__hh-mm-ss");
+                String strDate = dateFormat.format(new Date());
+
+                String path = Environment.getExternalStorageDirectory() + "/Snapshot__" + strDate + ".png";
+                Dbg("Snapshot filename", path);
+
+                File file = new File(path);
+                file.createNewFile();
+
+                FileOutputStream fos = new FileOutputStream(file);
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                fos.flush();
+                fos.close();
+            } catch (Exception e) {
+                Dbg("Snapshot exception", e.getStackTrace().toString());
+            }
+        }
+        if (totalBlue < 1000 || totalRed < 1000){
+            return 0;
+        } else if (xRedAvg > xBlueAvg) {
+            return BEACON_RED_BLUE;
+        } else if (xBlueAvg > xRedAvg) {
+            return BEACON_BLUE_RED;
+        } else {
+            return 0;
+        }
     }
 
     @Override

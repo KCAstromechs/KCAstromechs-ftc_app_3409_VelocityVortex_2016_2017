@@ -11,11 +11,11 @@ import com.qualcomm.robotcore.robot.Robot;
 @Autonomous(name = "AutoImageProccessTest", group = "State testing")
 public class AutoImageProccessTest extends LinearOpMode{
 
-    RobotBasePolaris robotBase;
+    CameraTest robotBase;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robotBase = new RobotBasePolaris();
+        robotBase = new CameraTest();
         robotBase.initCallingOpMode(this);
         robotBase.init(hardwareMap);
         waitForStart();
