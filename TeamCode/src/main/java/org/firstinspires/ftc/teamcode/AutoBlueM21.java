@@ -41,7 +41,7 @@ public class AutoBlueM21 extends LinearOpMode {
         robotBase.turn(90);
 
         //waits for robot to come to rest, then takes picture to determine beacon orientation
-        sleep(500);
+        sleep(2000);
         pos = robotBase.takePicture();
 
         //do some math to determine the angle the robot should drive to the beacon with
@@ -68,13 +68,13 @@ public class AutoBlueM21 extends LinearOpMode {
                 robotBase.pushButton(100 + (int)correctionAngle, 100, 2);
             }
             catch (TimeoutException e) {
-                robotBase.driveStraight(-12, -0.5, 100);
+                robotBase.driveStraight(-30, -0.5, 100);
             }
         }
         else if (pos == RobotBasePolaris.BEACON_BLUE_RED) {
             try {robotBase.pushButton(90 + (int)correctionAngle, 90, 2);}
             catch (TimeoutException e) {
-                robotBase.driveStraight(-12, -0.5, 90);
+                robotBase.driveStraight(-30, -0.5, 90);
             }
         }
         //TODO: test shooting
@@ -82,11 +82,17 @@ public class AutoBlueM21 extends LinearOpMode {
         robotBase.driveStraight(48, 0);
 
         robotBase.turn(90);
-        sleep(500);
+        sleep(2000);
         pos = robotBase.takePicture();
 
         telemetry.addData("",pos);
         telemetry.update();
+
+
+        shiftedAvg = ((90 - robotBase.getZRotation()) * robotBase.PIXELS_PER_DEGREE) + robotBase.getLastPicBeaconAvg();
+        deltaX = (340 - shiftedAvg)/robotBase.PIXELS_PER_INCH;
+        correctionAngle = Math.toDegrees(Math.atan(deltaX/30.));
+
 
         //push chosen button
         if (pos == RobotBasePolaris.BEACON_RED_BLUE){

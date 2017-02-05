@@ -336,12 +336,14 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         Image image = frame.getImage(idx);
         ByteBuffer px = image.getPixels();
 
+        int h = image.getHeight();
+        int w = image.getWidth();
         for (int i = 0; i < image.getHeight(); i++) {
-            for (int j = 925; j < 935; j++) {
-
-                thisR = px.get() & 0xFF;
-                thisG = px.get() & 0xFF;
-                thisB = px.get() & 0xFF;
+            for (int j = 355; j < 365; j++) {
+                //925, 935
+                thisR = px.get(i*w*3 + (j*3) ) & 0xFF;
+                thisG = px.get(i*w*3 + (j*3) + 1) & 0xFF;
+                thisB = px.get(i*w*3 + (j*3) + 2) & 0xFF;
 
                 if (thisB > 230 || thisG > 230 || thisR > 230) {
 
@@ -363,6 +365,8 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
 
         xRedAvg = xRedSum / totalRed;
         xBlueAvg = xBlueSum / totalBlue;
+        lastPicBeaconAvg = (xBlueAvg + xRedAvg) / 2.0;
+
 
         System.out.println("");
         System.out.println("width=" + image.getWidth());
@@ -374,12 +378,14 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         System.out.println("xRedAvg=" + xRedAvg);
         System.out.println("xBlueAvg=" + xBlueAvg);
 
-        if (totalBlue < 1000 || totalRed < 1000){
+        if (totalBlue < 50 || totalRed < 50){
             return 0;
         } else if (xRedAvg > xBlueAvg) {
-            return 1;
+            System.out.println("BEACON_RED_BLUE");
+            return BEACON_RED_BLUE;
         } else if (xBlueAvg > xRedAvg) {
-            return 2;
+            System.out.println("BEACON_BLUE_RED");
+            return BEACON_BLUE_RED;
         } else {
             return 0;
         }
@@ -736,7 +742,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        driveStraight(-12, -0.5, outHeading);
+        driveStraight(-30, -0.5, outHeading);
     }
 
     @Override
