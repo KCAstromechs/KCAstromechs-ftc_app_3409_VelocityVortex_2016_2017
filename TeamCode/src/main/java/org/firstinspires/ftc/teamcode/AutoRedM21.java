@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import java.sql.Time;
 
-@Autonomous(name="BeaconAutoRedTest", group="Red")
+@Autonomous(name="BeaconAutoRedPrimary", group="Primary")
 public class AutoRedM21 extends LinearOpMode {
 
     AstroRobotBaseInterface robotBase;

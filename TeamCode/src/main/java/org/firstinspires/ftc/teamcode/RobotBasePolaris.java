@@ -43,8 +43,8 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double driveSpeed = 0.75;     // Default drive speed for better accuracy.
-    static final double turnSpeed = 0.65;      // Default turn speed for better accuracy.
-    static final double P_DRIVE_COEFF = 0.1;    // Larger is more responsive, but also less stable
+    static final double turnSpeed = 0.5;      // Default turn speed for better accuracy.
+    static final double P_DRIVE_COEFF = 0.09;    // Larger is more responsive, but also less stable
 
     //defines orientation constants for beacons
     static final int BEACON_BLUE_RED = 2;
@@ -339,7 +339,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         int h = image.getHeight();
         int w = image.getWidth();
         for (int i = 0; i < image.getHeight(); i++) {
-            for (int j = 355; j < 365; j++) {
+            for (int j = 300; j < 600; j++) {//355 to 365
                 //925, 935
                 thisR = px.get(i*w*3 + (j*3) ) & 0xFF;
                 thisG = px.get(i*w*3 + (j*3) + 1) & 0xFF;
@@ -381,10 +381,10 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         if (totalBlue < 50 || totalRed < 50){
             return 0;
         } else if (xRedAvg > xBlueAvg) {
-            System.out.println("BEACON_RED_BLUE");
+            Dbg("BEACON_RED_BLUE",0, true);
             return BEACON_RED_BLUE;
         } else if (xBlueAvg > xRedAvg) {
-            System.out.println("BEACON_BLUE_RED");
+            Dbg("BEACON_BLUE_RED", 0, true);
             return BEACON_BLUE_RED;
         } else {
             return 0;
@@ -421,7 +421,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
                 //We now have the colors (one byte each) for any pixel, (j, i)
 
                 if (thisB < 100 || thisG > 100) { //filters through noise
-                    continue;
+                   continue;
                 }
                 if (thisR < thisB && thisR < 100) {
                     totalBlue++;
@@ -647,7 +647,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorSpinner.setPower(0);
         callingOpMode.sleep(250);
     }
-
+    
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         SensorManager.getRotationMatrixFromVector(rotationMatrix, sensorEvent.values);

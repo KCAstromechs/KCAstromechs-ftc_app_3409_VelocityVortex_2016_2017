@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-@Autonomous(name="BeaconAutoBlue", group="Blue")
+@Autonomous(name="BeaconAutoBlueBackup", group="Backup")
 public class AutoBluePos1 extends LinearOpMode {
 
     AstroRobotBaseInterface robotBase;
@@ -26,7 +26,8 @@ public class AutoBluePos1 extends LinearOpMode {
         robotBase.turn(38);
 
         //second drive to align the robot to the first beacon one one axis
-        robotBase.driveStraight(24, 38);
+        robotBase.driveStraight(31, 38);
+
 
         //turns robot to face beacon
         robotBase.turn(90);
@@ -85,11 +86,18 @@ public class AutoBluePos1 extends LinearOpMode {
 
         //push chosen button
         if (pos == RobotBasePolaris.BEACON_RED_BLUE){
-            robotBase.turn(108 + (float)correctionAngle);
-            try {robotBase.pushButton(108 + (int)correctionAngle, 108, 2);}
+            robotBase.turn(100 + (float)correctionAngle);
+            try {robotBase.pushButton(100 + (int)correctionAngle, 100, 2);}
             catch (TimeoutException e) {
-                robotBase.driveStraight(-12, -0.5, 108);
+                robotBase.driveStraight(-12, -0.5, 100);
             }
+
+
+
+
+
+
+
         }
         else if (pos == RobotBasePolaris.BEACON_BLUE_RED) {
             try {robotBase.pushButton(90 + (int)correctionAngle, 90, 2);}

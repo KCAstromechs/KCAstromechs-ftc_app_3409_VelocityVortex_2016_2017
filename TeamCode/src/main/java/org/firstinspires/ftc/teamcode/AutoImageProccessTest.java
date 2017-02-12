@@ -1,13 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.robot.Robot;
 
 /**
  * Created by N2Class1 on 1/29/2017.
  */
-
+@Disabled
 @Autonomous(name = "AutoImageProccessTest", group = "State testing")
 public class AutoImageProccessTest extends LinearOpMode {
 
