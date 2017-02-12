@@ -9,20 +9,27 @@ import com.qualcomm.robotcore.robot.Robot;
  */
 
 @Autonomous(name = "AutoImageProccessTest", group = "State testing")
-public class AutoImageProccessTest extends LinearOpMode{
+public class AutoImageProccessTest extends LinearOpMode {
 
     RobotBasePolaris robotBase;
 
     @Override
     public void runOpMode() throws InterruptedException {
+
         robotBase = new RobotBasePolaris();
         robotBase.initCallingOpMode(this);
         robotBase.init(hardwareMap);
+
         waitForStart();
-        int pos = robotBase.takeQuickPicture(); //pos doesn't currently contain any useful data
+
+        int pos = robotBase.takePicture();
+
+        if (pos == RobotBasePolaris.BEACON_RED_BLUE) {
+            System.out.println("TTT BEACON_RED_BLUE");
+        } else if (pos == RobotBasePolaris.BEACON_BLUE_RED) {
+            System.out.println("TTT BEACON_BLUE_RED");
+        } else {
+            System.out.println("TTT SAMUEL");
+        }
     }
-
-
-
-
 }
