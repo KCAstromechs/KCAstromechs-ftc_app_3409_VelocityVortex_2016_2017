@@ -43,8 +43,9 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double driveSpeed = 0.75;     // Default drive speed for better accuracy.
-    static final double turnSpeed = 0.5;      // Default turn speed for better accuracy.
+    static final double turnSpeed = 0.8;      // Default turn speed for better accuracy.
     static final double P_DRIVE_COEFF = 0.09;    // Larger is more responsive, but also less stable
+    static final double TURN_ERROR_CNSTNT = 0.55 / 40; //40 is the degree where we want to stop ramping down, 0.55 is power*TURN_ERROR_CNSTNT when max turn power is 0.5
 
     //defines orientation constants for beacons
     static final int BEACON_BLUE_RED = 2;
@@ -421,8 +422,6 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
                 //We now have the colors (one byte each) for any pixel, (j, i)
 
                 if (thisB < 100 || thisG > 100) { //filters through noise
-                   continue;
-                }
                 if (thisR < thisB && thisR < 100) {
                     totalBlue++;
                     xBlueSum += j;
@@ -573,6 +572,7 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         int wrapFix = 0;
         double rightPower;
         double leftPower;
+        boolean dumped = false;
         float shiftedTurnHeading = turnHeading;
 
         turnHeading = normalize360(turnHeading);
@@ -583,27 +583,42 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         clockwise = normalize360(clockwise);
         cclockwise = normalize360(cclockwise);
 
-        int error = 3; //sets the distance to the target gyro value that we will accept
+        int error = 1; //sets the distance to the target gyro value that we will accept
         if (turnHeading - error < 0|| turnHeading + error > 360) {
             wrapFix = 180; //if within the range where the clockmath breaks, shift to an easier position
             shiftedTurnHeading = normalize360(turnHeading + wrapFix);
         }
 
         if(Math.abs(cclockwise) >= Math.abs(clockwise)){
-            leftPower=power;
-            rightPower=-power;
-            motorFrontRight.setPower(rightPower);
-            motorFrontLeft.setPower(leftPower);
-            motorBackRight.setPower(rightPower);
-            motorBackLeft.setPower(leftPower);
 
             while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error &&
                     Math.abs(cclockwise) >= Math.abs(clockwise) && callingOpMode.opModeIsActive()) {
+
+                power = (Math.abs(zRotation - turnHeading) * TURN_ERROR_CNSTNT) + .25;
+
+                if (!dumped && power < 0.8){
+                    System.out.println("zRotation = " + zRotation);
+                    dumped = true;
+                }
+
+                if (power > 0.8)
+                    power = 0.8;
+
+                System.out.println("Power = " + power);
+
+                leftPower=power;
+                rightPower=-power;
+                motorFrontRight.setPower(rightPower);
+                motorFrontLeft.setPower(leftPower);
+                motorBackRight.setPower(rightPower);
+                motorBackLeft.setPower(leftPower);
+
                 callingOpMode.sleep(20);
                 cclockwise = normalize360(zRotation - turnHeading);
                 clockwise = normalize360(turnHeading - zRotation);
                 callingOpMode.idle();
             }
+
             motorFrontRight.setPower(0);
             motorFrontLeft.setPower(0);
             motorBackRight.setPower(0);
@@ -628,6 +643,8 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             motorBackRight.setPower(0);
             motorBackLeft.setPower(0);
         }
+
+
         callingOpMode.telemetry.update();
 
     }
@@ -647,7 +664,23 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         motorSpinner.setPower(0);
         callingOpMode.sleep(250);
     }
-    
+
+    public void hanShotFirstShootOnly() throws InterruptedException {
+//        target = motorShooter.getCurrentPosition() + 1600;
+        motorShooter.setPower(0.5);
+        while(!touchShooter.isPressed()) {
+            callingOpMode.sleep(1);
+        }
+
+
+//        while (motorShooter.getCurrentPosition() < target) callingOpMode.sleep(1);
+        motorShooter.setPower(0);
+        motorSpinner.setPower(0.5);
+        callingOpMode.sleep(2000);
+        motorSpinner.setPower(0);
+        callingOpMode.sleep(250);
+    }
+
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         SensorManager.getRotationMatrixFromVector(rotationMatrix, sensorEvent.values);
