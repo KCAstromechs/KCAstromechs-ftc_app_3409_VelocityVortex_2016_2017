@@ -43,9 +43,9 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double driveSpeed = 0.75;     // Default drive speed for better accuracy.
-    static final double turnSpeed = 0.8;      // Default turn speed for better accuracy.
+    static final double turnMaxSpeed = 1;      // Default maximum turn speed for better accuracy.
+    static final double stallSpeed = 0.25;
     static final double P_DRIVE_COEFF = 0.09;    // Larger is more responsive, but also less stable
-    static final double TURN_ERROR_CNSTNT = 0.55 / 40; //40 is the degree where we want to stop ramping down, 0.55 is power*TURN_ERROR_CNSTNT when max turn power is 0.5
 
     //defines orientation constants for beacons
     static final int BEACON_BLUE_RED = 2;
@@ -566,10 +566,14 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         Dbg(label, value, false);
     }
 
-    public void turn(float turnHeading)throws InterruptedException { turn(turnHeading, turnSpeed); }
+    public void turn(float turnHeading)throws InterruptedException { turn(turnHeading, turnMaxSpeed, stallSpeed); }
 
-    public void turn(float turnHeading, double power)throws InterruptedException{
+    public void turn(float turnHeading, double power)throws InterruptedException { turn(turnHeading, power, stallSpeed); }
+
+    public void turn(float turnHeading, double power, double minPower)throws InterruptedException{
+        double distance;
         int wrapFix = 0;
+        double motorSpeed = power;
         double rightPower;
         double leftPower;
         boolean dumped = false;
@@ -590,24 +594,25 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
         }
 
         if(Math.abs(cclockwise) >= Math.abs(clockwise)){
-
+            distance = clockwise;
             while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error &&
                     Math.abs(cclockwise) >= Math.abs(clockwise) && callingOpMode.opModeIsActive()) {
 
-                power = (Math.abs(zRotation - turnHeading) * TURN_ERROR_CNSTNT) + .25;
+                motorSpeed = (Math.abs(turnHeading-zRotation)/Math.abs(distance)) * power;
 
-                if (!dumped && power < 0.8){
-                    System.out.println("zRotation = " + zRotation);
-                    dumped = true;
-                }
+                System.out.println("motorSpeed " + motorSpeed);
 
-                if (power > 0.8)
-                    power = 0.8;
+                if (motorSpeed < minPower)
+                    motorSpeed = minPower;
+                if (motorSpeed > power)
+                    motorSpeed = power;
 
-                System.out.println("Power = " + power);
+                leftPower=motorSpeed;
+                rightPower=-motorSpeed;
 
-                leftPower=power;
-                rightPower=-power;
+                System.out.println("leftPower: " + leftPower);
+                System.out.println("rightPower " + rightPower);
+
                 motorFrontRight.setPower(rightPower);
                 motorFrontLeft.setPower(leftPower);
                 motorBackRight.setPower(rightPower);
@@ -624,15 +629,29 @@ public class RobotBasePolaris implements AstroRobotBaseInterface, SensorEventLis
             motorBackRight.setPower(0);
             motorBackLeft.setPower(0);
         }
+
+        //TODO: FIX math for motorSpeed in cc turn
         else if(Math.abs(clockwise) > Math.abs(cclockwise)){
-            leftPower=-power;
-            rightPower=power;
-            motorFrontRight.setPower(rightPower);
-            motorFrontLeft.setPower(leftPower);
-            motorBackRight.setPower(rightPower);
-            motorBackLeft.setPower(leftPower);
+            distance = cclockwise;
             while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error &&
                     Math.abs(clockwise) > Math.abs(cclockwise) && callingOpMode.opModeIsActive()) {
+
+                motorSpeed = (Math.abs(clockwise)/Math.abs(turnHeading-zRotation)) * power;
+
+                if (motorSpeed < minPower)
+                    motorSpeed = minPower;
+                if (motorSpeed > power)
+                    motorSpeed = power;
+
+
+                leftPower=-motorSpeed;
+                rightPower=motorSpeed;
+
+                motorFrontRight.setPower(rightPower);
+                motorFrontLeft.setPower(leftPower);
+                motorBackRight.setPower(rightPower);
+                motorBackLeft.setPower(leftPower);
+
                 callingOpMode.sleep(20);
                 cclockwise = normalize360(zRotation - turnHeading);
                 clockwise = normalize360(turnHeading - zRotation);
