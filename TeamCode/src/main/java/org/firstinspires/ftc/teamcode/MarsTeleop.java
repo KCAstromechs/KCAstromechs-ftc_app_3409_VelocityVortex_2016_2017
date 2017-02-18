@@ -46,6 +46,11 @@ public class MarsTeleop extends OpMode{
 
         // scale the joystick value to make it easier to control
         // the robot more precisely at slower speeds.
+        if(gamepad1.left_bumper){
+            right /= 2.71828182845904523536028747135266249775724709369995957496696762772;
+            left /= 2.71828182845904523536028747135266249775724709369995957496696762772;
+        }
+
         right = (float)scaleInput(right);
         left =  (float)scaleInput(left);
         //spin =  (float)scaleInput(spin);
