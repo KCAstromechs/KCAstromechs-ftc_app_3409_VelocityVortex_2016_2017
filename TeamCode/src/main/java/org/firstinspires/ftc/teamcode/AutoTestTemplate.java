@@ -9,16 +9,15 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Autonomous(name = "Ramp down/ramp up", group = "test")
 public class AutoTestTemplate extends LinearOpMode{
 
-    RobotBasePolaris rb;
+    RobotBaseMars rb;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        rb = new RobotBasePolaris();
-        rb.initCallingOpMode(this);
-        rb.init(hardwareMap);
+        rb = new RobotBaseMars();
+        rb.init(hardwareMap, this);
 
         waitForStart();
-        rb.driveStraight(60, 0);
+        rb.driveStraight(60, 0.9, 0);
         sleep(200);
 
     }
