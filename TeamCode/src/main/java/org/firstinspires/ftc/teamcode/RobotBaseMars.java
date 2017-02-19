@@ -46,7 +46,7 @@ public class RobotBaseMars implements SensorEventListener {
     static final double driveSpeed = 0.3;     // Default drive speed for better accuracy.
     static final double turnSpeed = 0.5;      // Default turn speed for better accuracy.
     static final double P_DRIVE_COEFF = 0.02;    // Larger is more responsive, but also less stable
-  static final double P_TURN_COEFF = 0.01;    // Larger is more responsive, but also less stable
+    static final double P_TURN_COEFF = 0.01;    // Larger is more responsive, but also less stable
     static final double D_TURN_COEFF = -0.01;    // Larger is more responsive, but also less stable
     static final double k_MOTOR_STALL_SPEED = 0.1;
     static final double P_RAMP_COEFF = 0.00082;
