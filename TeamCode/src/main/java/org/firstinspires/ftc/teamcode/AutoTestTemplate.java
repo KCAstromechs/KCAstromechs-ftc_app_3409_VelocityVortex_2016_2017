@@ -18,9 +18,8 @@ public class AutoTestTemplate extends LinearOpMode{
         rb.init(hardwareMap);
 
         waitForStart();
-        rb.turn(90);
+        rb.driveStraight(60, 0);
         sleep(200);
-        System.out.println("zRotation = " + rb.zRotation);
 
     }
 }
