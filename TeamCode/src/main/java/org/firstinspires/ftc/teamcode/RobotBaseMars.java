@@ -46,9 +46,10 @@ public class RobotBaseMars implements SensorEventListener {
     static final double driveSpeed = 0.3;     // Default drive speed for better accuracy.
     static final double turnSpeed = 0.5;      // Default turn speed for better accuracy.
     static final double P_DRIVE_COEFF = 0.02;    // Larger is more responsive, but also less stable
-    static final double P_TURN_COEFF = 0.01;    // Larger is more responsive, but also less stable
+  static final double P_TURN_COEFF = 0.01;    // Larger is more responsive, but also less stable
     static final double D_TURN_COEFF = -0.01;    // Larger is more responsive, but also less stable
     static final double k_MOTOR_STALL_SPEED = 0.1;
+    static final double P_RAMP_COEFF = 0.00082;
 
     //defines orientation constants for beacons
     static final int BEACON_BLUE_RED = 2;
@@ -159,8 +160,11 @@ public class RobotBaseMars implements SensorEventListener {
         double correction;
         double leftPower;
         double rightPower;
-
+        double distanceFromInitial, errorFromEndpoint;
+        double encoderInitialPos = encoderMotor.getCurrentPosition();
         target = (int) (inches * COUNTS_PER_INCH);
+
+        callingOpMode.telemetry.addData("Initial position", encoderInitialPos);
 
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -180,6 +184,10 @@ public class RobotBaseMars implements SensorEventListener {
 
         while (Math.abs(encoderMotor.getCurrentPosition()) < Math.abs(target) && callingOpMode.opModeIsActive()) {
             error = heading - zRotation;
+
+            distanceFromInitial = Math.abs(encoderMotor.getCurrentPosition() - encoderInitialPos);
+            errorFromEndpoint = Math.abs(encoderMotor.getCurrentPosition() - target);
+
             while (error > 180) error = (error - 360);
             while (error <= -180) error = (error + 360);
 
@@ -188,6 +196,33 @@ public class RobotBaseMars implements SensorEventListener {
             /*if (inches < 0)
                 correction *= -1.0;
             */
+
+            if(target > 1100) {
+                if (distanceFromInitial < 1100) {
+                    power = distanceFromInitial * P_RAMP_COEFF;
+
+                    callingOpMode.telemetry.addData("Initial position", encoderInitialPos);
+                    callingOpMode.telemetry.addData("distanceFromInitial: ", distanceFromInitial);
+                    callingOpMode.telemetry.addData("power: ", power);
+                    callingOpMode.telemetry.update();
+                }
+                else if (errorFromEndpoint < 1100) {
+                    power = errorFromEndpoint * P_RAMP_COEFF;
+
+                    callingOpMode.telemetry.addData("power: ", power);
+                    callingOpMode.telemetry.update();
+                }
+            }
+
+            if(Math.abs(power) < 0.25) {
+                if(power >= 0) {
+                    power = 0.25;
+                }
+                else {
+                    power = -0.25;
+                }
+            }
+
             leftPower = power + correction;
             rightPower = power - correction;
 
