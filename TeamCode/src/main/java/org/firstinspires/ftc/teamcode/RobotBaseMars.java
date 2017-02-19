@@ -44,8 +44,11 @@ public class RobotBaseMars implements SensorEventListener {
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double driveSpeed = 0.3;     // Default drive speed for better accuracy.
-    static final double turnSpeed = 0.25;      // Default turn speed for better accuracy.
+    static final double turnSpeed = 0.5;      // Default turn speed for better accuracy.
     static final double P_DRIVE_COEFF = 0.02;    // Larger is more responsive, but also less stable
+    static final double P_TURN_COEFF = 0.01;    // Larger is more responsive, but also less stable
+    static final double D_TURN_COEFF = -0.01;    // Larger is more responsive, but also less stable
+    static final double k_MOTOR_STALL_SPEED = 0.1;
 
     //defines orientation constants for beacons
     static final int BEACON_BLUE_RED = 2;
@@ -303,6 +306,7 @@ public class RobotBaseMars implements SensorEventListener {
         int wrapFix = 0;
         double rightPower;
         double leftPower;
+        double motorSpeed = power;
         float shiftedTurnHeading = turnHeading;
 
         turnHeading = normalize360(turnHeading);
@@ -313,6 +317,10 @@ public class RobotBaseMars implements SensorEventListener {
         clockwise = normalize360(clockwise);
         cclockwise = normalize360(cclockwise);
 
+        float lastError;
+        double lastTime;
+        double d;
+
         int error = 1; //sets the distance to the target gyro value that we will accept
         if (turnHeading - error < 0|| turnHeading + error > 360) {
             wrapFix = 180; //if within the range where the clockmath breaks, shift to an easier position
@@ -320,19 +328,26 @@ public class RobotBaseMars implements SensorEventListener {
         }
 
         if(Math.abs(cclockwise) >= Math.abs(clockwise)){
-            leftPower=power;
-            rightPower=-power;
-            motorFrontRight.setPower(rightPower);
-            motorFrontLeft.setPower(leftPower);
-            motorBackRight.setPower(rightPower);
-            motorBackLeft.setPower(leftPower);
-
+            lastError = clockwise;
+            lastTime = callingOpMode.getRuntime();
             while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error &&
                     Math.abs(cclockwise) >= Math.abs(clockwise) && callingOpMode.opModeIsActive()) {
                 callingOpMode.sleep(20);
+                d = (Math.abs(lastError-clockwise))/(callingOpMode.getRuntime()-lastTime);
+                motorSpeed = clockwise*P_TURN_COEFF+d*D_TURN_COEFF;
+                if(motorSpeed>power){
+                    motorSpeed=power;
+                }else if(motorSpeed<k_MOTOR_STALL_SPEED){
+                    motorSpeed=k_MOTOR_STALL_SPEED;
+                }
+                leftPower=motorSpeed;
+                rightPower=-motorSpeed;
+                motorFrontRight.setPower(rightPower);
+                motorFrontLeft.setPower(leftPower);
+                motorBackRight.setPower(rightPower);
+                motorBackLeft.setPower(leftPower);
                 cclockwise = normalize360(zRotation - turnHeading);
                 clockwise = normalize360(turnHeading - zRotation);
-                callingOpMode.idle();
             }
             motorFrontRight.setPower(0);
             motorFrontLeft.setPower(0);
@@ -340,18 +355,26 @@ public class RobotBaseMars implements SensorEventListener {
             motorBackLeft.setPower(0);
         }
         else if(Math.abs(clockwise) > Math.abs(cclockwise)){
-            leftPower=-power;
-            rightPower=power;
-            motorFrontRight.setPower(rightPower);
-            motorFrontLeft.setPower(leftPower);
-            motorBackRight.setPower(rightPower);
-            motorBackLeft.setPower(leftPower);
+            lastError = cclockwise;
+            lastTime = callingOpMode.getRuntime();
             while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error &&
                     Math.abs(clockwise) > Math.abs(cclockwise) && callingOpMode.opModeIsActive()) {
                 callingOpMode.sleep(20);
+                d = (Math.abs(lastError-cclockwise))/(callingOpMode.getRuntime()-lastTime);
+                motorSpeed = cclockwise*P_TURN_COEFF+d*D_TURN_COEFF;
+                if(motorSpeed>power){
+                    motorSpeed=power;
+                }else if(motorSpeed<k_MOTOR_STALL_SPEED){
+                    motorSpeed=k_MOTOR_STALL_SPEED;
+                }
+                leftPower=-motorSpeed;
+                rightPower=motorSpeed;
+                motorFrontRight.setPower(rightPower);
+                motorFrontLeft.setPower(leftPower);
+                motorBackRight.setPower(rightPower);
+                motorBackLeft.setPower(leftPower);
                 cclockwise = normalize360(zRotation - turnHeading);
                 clockwise = normalize360(turnHeading - zRotation);
-                callingOpMode.idle();
             }
             motorFrontRight.setPower(0);
             motorFrontLeft.setPower(0);
