@@ -70,8 +70,11 @@ public class RobotBaseMars implements SensorEventListener {
     public DcMotor motorBackLeft = null;
     public DcMotor motorFrontRight = null;
     public DcMotor motorBackRight = null;
+    public DcMotor motorShooter = null;
+
     public DcMotor encoderMotor = null;
     public TouchSensor touchPow = null;
+    public TouchSensor touchShooter = null;
     public boolean hasBeenZeroed= false;
 
     HardwareMap hwMap = null;
@@ -102,6 +105,8 @@ public class RobotBaseMars implements SensorEventListener {
         motorBackRight = hwMap.dcMotor.get("backRight");
         encoderMotor = hwMap.dcMotor.get("frontLeft");
 
+        motorShooter = hwMap.dcMotor.get("shooter");
+
         motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
         motorBackLeft.setDirection(DcMotor.Direction.FORWARD);
         motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
@@ -120,7 +125,8 @@ public class RobotBaseMars implements SensorEventListener {
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
-        touchPow = hwMap.touchSensor.get("touch");
+        touchShooter = hwMap.touchSensor.get("touchShooter");
+        touchPow = hwMap.touchSensor.get("touchPow");
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -420,6 +426,24 @@ public class RobotBaseMars implements SensorEventListener {
 
     }
 
+    public void hanShotFirst() throws InterruptedException {
+        motorShooter.setPower(0.5);
+        while (!touchShooter.isPressed()) {
+            callingOpMode.sleep(1);
+        }
+        callingOpMode.sleep(75);
+        motorShooter.setPower(0);
+    }
+
+    public void cockShooter() throws InterruptedException {
+        motorShooter.setPower(0.5);
+        while (!touchShooter.isPressed()) {
+            callingOpMode.sleep(1);
+        }
+        motorShooter.setPower(0);
+    }
+
+
     public void pushButton(int heading, int outHeading, double timeOutSec) throws InterruptedException, TimeoutException {
         double max;
         double error;
@@ -467,6 +491,8 @@ public class RobotBaseMars implements SensorEventListener {
             motorBackLeft.setPower(leftPower);
             motorBackRight.setPower(rightPower);
         }
+
+
 
         if (System.currentTimeMillis() - initialTime >= timeOutSec) {
             motorFrontLeft.setPower(0);
