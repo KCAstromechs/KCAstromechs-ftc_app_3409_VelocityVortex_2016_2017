@@ -5,6 +5,7 @@ package org.firstinspires.ftc.teamcode;
  */
 
 import android.graphics.Color;
+import android.graphics.Path;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -12,6 +13,7 @@ import android.hardware.SensorManager;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -47,13 +49,15 @@ public class RobotBaseMars implements SensorEventListener {
     static final double turnSpeed = 0.5;      // Default turn speed for better accuracy.
     static final double P_DRIVE_COEFF = 0.02;    // Larger is more responsive, but also less stable
     static final double P_TURN_COEFF = 0.01;    // Larger is more responsive, but also less stable
-    static final double D_TURN_COEFF = -0.01;    // Larger is more responsive, but also less stable
-    static final double k_MOTOR_STALL_SPEED = 0.1;
+    static final double D_TURN_COEFF = -0.03;    // Larger is more responsive, but also less stable
+    static final double k_MOTOR_STALL_SPEED = 0.125;
     static final double P_RAMP_COEFF = 0.00082;
 
     //defines orientation constants for beacons
     static final int BEACON_BLUE_RED = 2;
     static final int BEACON_RED_BLUE = 1;
+
+    public static double reloadResetTime = -1;
 
     final int PIXELS_PER_INCH = 35;
 
@@ -75,11 +79,16 @@ public class RobotBaseMars implements SensorEventListener {
     public DcMotor encoderMotor = null;
     public TouchSensor touchPow = null;
     public TouchSensor touchShooter = null;
+    public Servo reloaderServo = null;
     public boolean hasBeenZeroed= false;
 
     HardwareMap hwMap = null;
 
+    static final double RELOADER_CLOSED = 0.22; //0.35
+    static final double RELOADER_OPEN = 0.6; //0.75
+
     LinearOpMode callingOpMode;
+    OpMode callingTeleOp;
     private SensorManager mSensorManager;
     private Sensor mRotationVectorSensor;
 
@@ -88,6 +97,13 @@ public class RobotBaseMars implements SensorEventListener {
     // 0 is set as straight ahead of the robot, 90 is the right, 270 is to the left
     public float zRotation;
     public double lastPicBeaconAvg;
+
+    public long targetShooterPos = 0;
+    public boolean shooterIsBusy = false;
+    public boolean shooterIsResetting = false;
+
+    private static final double[] scaleArray = {0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
+            0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00};
 
     VuforiaLocalizer vuforia;
 
@@ -125,6 +141,8 @@ public class RobotBaseMars implements SensorEventListener {
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
+
+        reloaderServo = hwMap.servo.get("reloader");
         touchShooter = hwMap.touchSensor.get("touchShooter");
         touchPow = hwMap.touchSensor.get("touchPow");
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -150,6 +168,62 @@ public class RobotBaseMars implements SensorEventListener {
 
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB888, true);
         vuforia.setFrameQueueCapacity(1);
+
+        reloaderServo.setPosition(RELOADER_CLOSED);
+
+        callingOpMode.telemetry.addData(">", "Robot Ready.");    //
+        callingOpMode.telemetry.update();
+    }
+
+    public void init(HardwareMap ahwMap, OpMode _callingOpMode) {
+
+        callingTeleOp = _callingOpMode;
+        // Save reference to Hardware map
+        hwMap = ahwMap;
+
+        // Define and Initialize Motors
+
+        motorFrontLeft = hwMap.dcMotor.get("frontLeft");
+        motorBackLeft = hwMap.dcMotor.get("backLeft");
+        motorFrontRight = hwMap.dcMotor.get("frontRight");
+        motorBackRight = hwMap.dcMotor.get("backRight");
+        encoderMotor = hwMap.dcMotor.get("frontLeft");
+
+        motorShooter = hwMap.dcMotor.get("shooter");
+
+        motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
+        motorBackLeft.setDirection(DcMotor.Direction.FORWARD);
+        motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
+        motorBackRight.setDirection(DcMotor.Direction.REVERSE);
+
+        // Set all motors to zero power
+        motorFrontLeft.setPower(0);
+        motorFrontRight.setPower(0);
+        motorBackLeft.setPower(0);
+        motorBackRight.setPower(0);
+
+        // Set all motors to run without encoders.
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        // Define and initialize ALL installed servos.
+
+        reloaderServo = hwMap.servo.get("reloader");
+        touchShooter = hwMap.touchSensor.get("touchShooter");
+        touchPow = hwMap.touchSensor.get("touchPow");
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        reloaderServo.setPosition(RELOADER_CLOSED);
 
         callingOpMode.telemetry.addData(">", "Robot Ready.");    //
         callingOpMode.telemetry.update();
@@ -198,10 +272,6 @@ public class RobotBaseMars implements SensorEventListener {
             while (error <= -180) error = (error + 360);
 
             correction = Range.clip(error * P_DRIVE_COEFF, -1, 1);
-
-            /*if (inches < 0)
-                correction *= -1.0;
-            */
 
             if(target > 1100) {
                 if (distanceFromInitial < 1100) {
@@ -373,7 +443,7 @@ public class RobotBaseMars implements SensorEventListener {
             lastTime = callingOpMode.getRuntime();
             while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error &&
                     Math.abs(cclockwise) >= Math.abs(clockwise) && callingOpMode.opModeIsActive()) {
-                callingOpMode.sleep(20);
+                callingOpMode.sleep(10);
                 d = (Math.abs(lastError-clockwise))/(callingOpMode.getRuntime()-lastTime);
                 motorSpeed = clockwise*P_TURN_COEFF+d*D_TURN_COEFF;
                 if(motorSpeed>power){
@@ -400,7 +470,7 @@ public class RobotBaseMars implements SensorEventListener {
             lastTime = callingOpMode.getRuntime();
             while(Math.abs(normalize360(zRotation + wrapFix)- shiftedTurnHeading) > error &&
                     Math.abs(clockwise) > Math.abs(cclockwise) && callingOpMode.opModeIsActive()) {
-                callingOpMode.sleep(20);
+                callingOpMode.sleep(10);
                 d = (Math.abs(lastError-cclockwise))/(callingOpMode.getRuntime()-lastTime);
                 motorSpeed = cclockwise*P_TURN_COEFF+d*D_TURN_COEFF;
                 if(motorSpeed>power){
@@ -428,10 +498,10 @@ public class RobotBaseMars implements SensorEventListener {
 
     public void hanShotFirst() throws InterruptedException {
         motorShooter.setPower(0.5);
+        callingOpMode.sleep(300);
         while (!touchShooter.isPressed()) {
             callingOpMode.sleep(1);
         }
-        callingOpMode.sleep(75);
         motorShooter.setPower(0);
     }
 
@@ -442,6 +512,99 @@ public class RobotBaseMars implements SensorEventListener {
         }
         motorShooter.setPower(0);
     }
+    public void reloadShooter() throws InterruptedException{
+        reloaderServo.setPosition((RELOADER_OPEN+RELOADER_CLOSED)/2);
+        callingOpMode.sleep(1000);
+        System.out.println("SSS reloaderPos @Midpoint: " + reloaderServo.getPosition());
+        reloaderServo.setPosition(RELOADER_OPEN);
+        callingOpMode.sleep(1000);
+        System.out.println("SSS reloaderPos @Open: " + reloaderServo.getPosition());
+        reloaderServo.setPosition(RELOADER_OPEN+0.2);
+        callingOpMode.sleep(1000);
+        System.out.println("SSS reloaderPos @Far: " + reloaderServo.getPosition());
+        reloaderServo.setPosition(RELOADER_CLOSED);
+    }
+
+    public void reloadHandler(boolean rb) {
+        if(rb && reloadResetTime == -1) {
+            reloaderServo.setPosition(RELOADER_OPEN);
+            reloadResetTime = callingOpMode.getRuntime() + 0.4;
+        }
+        else if(callingOpMode.getRuntime() > reloadResetTime && reloadResetTime != -1) {
+            reloaderServo.setPosition(RELOADER_CLOSED);
+            reloadResetTime = -1;
+        }
+    }
+    public void teleopUpdateDrive(float left, float right, boolean lb){
+        // tank drive
+        // note that if y equal -1 then joystick is pushed all of the way forward.
+
+        // clip the right/left values so that the values never exceed +/- 1
+        right = Range.clip(right, -1, 1);
+        left = Range.clip(left, -1, 1);
+        //spin = Range.clip(spin, -1, 1); *reinstate if turned back to float
+
+        if(lb){
+            right /= 2.71828182845904523536028747135266249775724709369995957496696762772;
+            left /= 2.71828182845904523536028747135266249775724709369995957496696762772;
+        }
+        // scale the joystick value to make it easier to control
+        // the robot more precisely at slower speeds.
+        right = (float)scaleInput(right);
+        left =  (float)scaleInput(left);
+        //spin =  (float)scaleInput(spin);
+
+        // write the values to the drive motors
+        motorFrontRight.setPower(right);
+        motorBackRight.setPower(right);
+        motorFrontLeft.setPower(left);
+        motorBackLeft.setPower(left);
+    }
+
+
+    public void shooterHandler(boolean y, boolean lb, boolean rb){
+        if(!shooterIsResetting) {
+            if (lb) {
+                motorShooter.setPower(0.7);
+            } else if (rb){
+                motorShooter.setPower(0.7);
+                shooterIsResetting = true;
+            } else {
+                motorShooter.setPower(0);
+            }
+        } else if (shooterIsResetting && touchShooter.isPressed()){
+            motorShooter.setPower(0);
+            shooterIsResetting = false;
+        }
+    }
+
+    private double scaleInput(double dVal)  {
+
+        // get the corresponding index for the scaleInput array.
+        int index = (int) (dVal * 16.0);
+
+        // index should be positive.
+        if (index < 0) {
+            index = -index;
+        }
+
+        // index cannot exceed size of array minus 1.
+        if (index > 16) {
+            index = 16;
+        }
+
+        // get value from the array.
+        double dScale;
+        if (dVal < 0) {
+            dScale = -scaleArray[index];
+        } else {
+            dScale = scaleArray[index];
+        }
+
+        // return scaled value.
+        return dScale;
+    }
+
 
 
     public void pushButton(int heading, int outHeading, double timeOutSec) throws InterruptedException, TimeoutException {
@@ -517,7 +680,7 @@ public class RobotBaseMars implements SensorEventListener {
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        driveStraight(-30, -0.5, outHeading);
+        driveStraight(-8, -0.5, outHeading);
     }
 
     public void deconstruct(){

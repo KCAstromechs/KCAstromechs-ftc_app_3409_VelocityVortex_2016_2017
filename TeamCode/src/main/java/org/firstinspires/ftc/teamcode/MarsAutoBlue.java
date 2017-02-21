@@ -19,11 +19,11 @@ public class MarsAutoBlue extends LinearOpMode {
         robotBase.cockShooter();
         waitForStart();
 
+        System.out.println("SSS reloaderPos @Start: " + robotBase.reloaderServo.getPosition());
+
         //initial drive
 
-        robotBase.hanShotFirst();
-
-        robotBase.driveStraight(20, 0);
+        robotBase.driveStraight(23, 0);
 
         //turns parallel to ramp
         robotBase.turn(38);
@@ -32,10 +32,11 @@ public class MarsAutoBlue extends LinearOpMode {
         robotBase.driveStraight(24, 38);
 
         //turns robot to face beacon
-        robotBase.turn(90);
+        robotBase.turn(85);
 
         //waits for robot to come to rest, then takes picture to determine beacon orientation
         sleep(2000);
+        System.out.println("SSS heading after turn to take picture: " + robotBase.zRotation);
         pos = robotBase.takePicture();
 
         //do some math to determine the angle the robot should drive to the beacon with
@@ -51,7 +52,7 @@ public class MarsAutoBlue extends LinearOpMode {
         System.out.println("deltaX: " + deltaX);
         System.out.println("correctionAngle: " + correctionAngle);
 
-        telemetry.addData("",pos);
+        telemetry.addData("pos ",pos);
         telemetry.update();
 
         System.out.println(pos);
@@ -62,15 +63,30 @@ public class MarsAutoBlue extends LinearOpMode {
                 robotBase.pushButton(100 + (int)correctionAngle, 100, 2);
             }
             catch (TimeoutException e) {
-                robotBase.driveStraight(-30, -0.5, 100);
+                robotBase.driveStraight(-8, -0.5, 100);
             }
         }
         else if (pos == RobotBasePolaris.BEACON_BLUE_RED) {
             try {robotBase.pushButton(90 + (int)correctionAngle, 90, 2);}
             catch (TimeoutException e) {
-                robotBase.driveStraight(-30, -0.5, 90);
+                robotBase.driveStraight(-8, -0.5, 90);
             }
         }
+
+        robotBase.turn(292);
+
+        robotBase.hanShotFirst();
+
+        robotBase.reloadShooter();
+
+        robotBase.hanShotFirst();
+
+        sleep(1000);
+
+        System.out.println("SSS reloaderPos @end: " + robotBase.reloaderServo.getPosition());
+
+
+        /*
         robotBase.turn(0);
         robotBase.driveStraight(48, 0);
 
@@ -104,6 +120,8 @@ public class MarsAutoBlue extends LinearOpMode {
 
         robotBase.deconstruct();
         robotBase = null;
+
+        */
     }
 
 }

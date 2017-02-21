@@ -51,6 +51,8 @@ public class MarsTeleop extends OpMode{
             left /= 2.71828182845904523536028747135266249775724709369995957496696762772;
         }
 
+
+
         right = (float)scaleInput(right);
         left =  (float)scaleInput(left);
         //spin =  (float)scaleInput(spin);
