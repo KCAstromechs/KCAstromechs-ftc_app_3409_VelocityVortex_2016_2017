@@ -3,7 +3,12 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
+
+import static org.firstinspires.ftc.teamcode.RobotBaseMars.reloadResetTime;
 
 @TeleOp (name="MarsTeleop", group="Teleop")
 public class MarsTeleop extends OpMode{
@@ -15,6 +20,21 @@ public class MarsTeleop extends OpMode{
     private DcMotor motorBackLeft = null;
     private DcMotor motorFrontRight = null;
     private DcMotor motorBackRight = null;
+    private DcMotor motorShooter = null;
+    private DcMotor motorSpinner = null;
+    private DcMotor motorLifterLeft = null;
+    private DcMotor motorLifterRight = null;
+    private TouchSensor touchShooter = null;
+    private Servo reloaderServo = null;
+
+    private boolean shooterIsBusy;
+    private boolean shooterIsResetting;
+    private boolean released = true;
+    private boolean spinToggle;
+    private long target;
+
+    private double RELOADER_CLOSED = 0.22;
+    private double RELOADER_OPEN = 0.6;
 
     @Override
     public void init(){
@@ -23,10 +43,19 @@ public class MarsTeleop extends OpMode{
         motorBackRight = hardwareMap.dcMotor.get("backRight");
         motorBackLeft = hardwareMap.dcMotor.get("backLeft");
 
+        motorShooter = hardwareMap.dcMotor.get("shooter");
+        motorSpinner = hardwareMap.dcMotor.get("spinner");
+        motorLifterLeft = hardwareMap.dcMotor.get("lifterLeft");
+        motorLifterRight = hardwareMap.dcMotor.get("lifterRight");
+
+        reloaderServo = hardwareMap.servo.get("reloader");
+        touchShooter = hardwareMap.touchSensor.get("touchShooter");
+
         motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
         motorFrontRight.setDirection(DcMotor.Direction.FORWARD);
         motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
         motorBackRight.setDirection(DcMotor.Direction.FORWARD);
+        motorLifterLeft.setDirection(DcMotor.Direction.REVERSE);
 
         motorFrontLeft.setPower(0);
         motorFrontRight.setPower(0);
@@ -47,8 +76,8 @@ public class MarsTeleop extends OpMode{
         // scale the joystick value to make it easier to control
         // the robot more precisely at slower speeds.
         if(gamepad1.left_bumper){
-            right /= 2.71828182845904523536028747135266249775724709369995957496696762772;
-            left /= 2.71828182845904523536028747135266249775724709369995957496696762772;
+            right /= 2.71828182845904523536028747135266249775724709369995957496696762772; // ~36.7%
+            left /= 2.71828182845904523536028747135266249775724709369995957496696762772;  //this is a whole bunch of digits of e
         }
 
 
@@ -62,6 +91,61 @@ public class MarsTeleop extends OpMode{
         motorBackRight.setPower(right);
         motorFrontLeft.setPower(left);
         motorBackLeft.setPower(left);
+
+
+        if(gamepad2.left_bumper && reloadResetTime == -1) {
+            reloaderServo.setPosition(RELOADER_OPEN);
+            reloadResetTime = getRuntime() + 0.4;
+        } else if(getRuntime() > reloadResetTime && reloadResetTime != -1) {
+            reloaderServo.setPosition(RELOADER_CLOSED);
+            reloadResetTime = -1;
+        }
+
+        if((motorShooter.getCurrentPosition() > target || !shooterIsBusy) && !shooterIsResetting) {
+            shooterIsBusy=false;
+            if (gamepad1.right_bumper) {
+                target=motorShooter.getCurrentPosition()+1600;
+                motorShooter.setPower(0.7);
+                shooterIsBusy=true;
+            } else if (gamepad1.y||gamepad2.y) {
+                motorShooter.setPower(0.7);
+            } else if (gamepad2.right_bumper){
+                motorShooter.setPower(0.7);
+                shooterIsResetting = true;
+            } else {
+                motorShooter.setPower(0);
+            }
+        } else if (shooterIsResetting && touchShooter.isPressed()){
+            motorShooter.setPower(0);
+            shooterIsResetting = false;
+        }
+
+        if(!spinToggle){
+            if (gamepad2.a && released) {
+                motorSpinner.setPower(1.0);
+                spinToggle = true;
+                released = false;
+            } else if (!gamepad2.a){
+                released = true;
+            }
+        } else {
+            if (gamepad2.a && released){
+                motorSpinner.setPower(0);
+                spinToggle = false;
+                released = false;
+            } else if (!gamepad2.a){
+                released = true;
+            }
+        }
+
+        float right2 = Range.clip(gamepad2.right_stick_y, -1, 1);
+        float left2 = Range.clip(gamepad2.left_stick_y, -1, 1);
+
+        right2 = (float)scaleInput(right);
+        left2 =  (float)scaleInput(left);
+
+        motorLifterRight.setPower(right2);
+        motorLifterLeft.setPower(left2);
     }
 
     private double scaleInput(double dVal)  {
