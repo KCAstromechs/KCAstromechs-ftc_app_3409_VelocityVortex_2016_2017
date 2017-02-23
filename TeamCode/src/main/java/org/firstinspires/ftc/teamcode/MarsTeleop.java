@@ -33,8 +33,8 @@ public class MarsTeleop extends OpMode{
     private boolean spinToggle;
     private long target;
 
-    private double RELOADER_CLOSED = 0.22;
-    private double RELOADER_OPEN = 0.6;
+    private double RELOADER_CLOSED = 0.32; //22
+    private double RELOADER_OPEN = 0.8; //0.6
 
     @Override
     public void init(){
@@ -56,6 +56,8 @@ public class MarsTeleop extends OpMode{
         motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
         motorBackRight.setDirection(DcMotor.Direction.FORWARD);
         motorLifterLeft.setDirection(DcMotor.Direction.REVERSE);
+
+        motorShooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         motorFrontLeft.setPower(0);
         motorFrontRight.setPower(0);
@@ -95,7 +97,7 @@ public class MarsTeleop extends OpMode{
 
         if(gamepad2.left_bumper && reloadResetTime == -1) {
             reloaderServo.setPosition(RELOADER_OPEN);
-            reloadResetTime = getRuntime() + 0.4;
+            reloadResetTime = getRuntime() + 1;
         } else if(getRuntime() > reloadResetTime && reloadResetTime != -1) {
             reloaderServo.setPosition(RELOADER_CLOSED);
             reloadResetTime = -1;
@@ -104,7 +106,7 @@ public class MarsTeleop extends OpMode{
         if((motorShooter.getCurrentPosition() > target || !shooterIsBusy) && !shooterIsResetting) {
             shooterIsBusy=false;
             if (gamepad1.right_bumper) {
-                target=motorShooter.getCurrentPosition()+1600;
+                target=motorShooter.getCurrentPosition() + 1560;
                 motorShooter.setPower(0.7);
                 shooterIsBusy=true;
             } else if (gamepad1.y||gamepad2.y) {
@@ -117,6 +119,12 @@ public class MarsTeleop extends OpMode{
             }
         } else if (shooterIsResetting && touchShooter.isPressed()){
             motorShooter.setPower(0);
+            shooterIsResetting = false;
+        }
+
+        if(gamepad1.b||gamepad2.b){
+            motorShooter.setPower(0);
+            shooterIsBusy = false;
             shooterIsResetting = false;
         }
 
@@ -146,6 +154,9 @@ public class MarsTeleop extends OpMode{
 
         motorLifterRight.setPower(right2);
         motorLifterLeft.setPower(left2);
+
+        telemetry.addData("", motorShooter.getCurrentPosition());
+        telemetry.update();
     }
 
     private double scaleInput(double dVal)  {

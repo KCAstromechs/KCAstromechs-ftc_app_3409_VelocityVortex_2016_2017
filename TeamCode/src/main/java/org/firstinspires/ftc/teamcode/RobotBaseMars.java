@@ -74,7 +74,12 @@ public class RobotBaseMars implements SensorEventListener {
     public DcMotor motorBackLeft = null;
     public DcMotor motorFrontRight = null;
     public DcMotor motorBackRight = null;
+
     public DcMotor motorShooter = null;
+    public DcMotor motorSpinner = null;
+
+    public DcMotor motorLifterLeft = null;
+    public DcMotor motorLifterRight = null;
 
     public DcMotor encoderMotor = null;
     public TouchSensor touchPow = null;
@@ -121,7 +126,11 @@ public class RobotBaseMars implements SensorEventListener {
         motorBackRight = hwMap.dcMotor.get("backRight");
         encoderMotor = hwMap.dcMotor.get("frontLeft");
 
+        motorSpinner = hwMap.dcMotor.get("spinner");
         motorShooter = hwMap.dcMotor.get("shooter");
+
+        motorLifterLeft = hwMap.dcMotor.get("lifterLeft");
+        motorLifterRight = hwMap.dcMotor.get("lifterRight");
 
         motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
         motorBackLeft.setDirection(DcMotor.Direction.FORWARD);
@@ -560,7 +569,6 @@ public class RobotBaseMars implements SensorEventListener {
         motorFrontLeft.setPower(left);
         motorBackLeft.setPower(left);
     }
-
 
     public void shooterHandler(boolean y, boolean lb, boolean rb){
         if(!shooterIsResetting) {
