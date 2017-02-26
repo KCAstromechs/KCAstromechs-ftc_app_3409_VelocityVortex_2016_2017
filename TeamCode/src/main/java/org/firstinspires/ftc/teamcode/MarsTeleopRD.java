@@ -71,7 +71,7 @@ public class MarsTeleopRD extends OpMode{
         }
 
 
-        robotBase.updateDriveMotors(gamepad1.left_stick_y, gamepad1.right_stick_y, gamepad1.right_bumper);
+        robotBase.updateDriveMotors(-gamepad1.left_stick_y, -gamepad1.right_stick_y, gamepad1.right_bumper);
     }
 }
 
