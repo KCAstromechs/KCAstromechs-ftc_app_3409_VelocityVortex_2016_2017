@@ -117,6 +117,8 @@ public class RobotBaseMarsRD implements SensorEventListener {
     public boolean shooterIsNudged = false;
     public boolean touchToggle = false;
     public boolean spinnerIsRunning = false;
+    static boolean reloadJustFinished = false;
+
 
     private static final double[] scaleArray = {0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
             0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00};
@@ -491,6 +493,9 @@ public class RobotBaseMarsRD implements SensorEventListener {
         updateDriveMotors(0, 0, false);
     }
     public boolean reloadHandler(boolean reloadRequested) {
+        if(callingOpMode.getRuntime() > timeToFinishReload) {
+            reloadJustFinished = true;
+        }
         if(reloadRequested && reloadResetTime == -1 && !isReloadResetting) {
             reloaderServo.setPosition(RELOADER_OPEN);
             reloadResetTime = callingOpMode.getRuntime() + 0.4;
