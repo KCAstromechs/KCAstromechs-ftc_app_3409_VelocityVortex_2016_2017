@@ -50,8 +50,8 @@ public class RobotBaseMarsRD implements SensorEventListener {
     static final double P_DRIVE_COEFF = 0.02;    // Larger is more responsive, but also less stable
     static final double P_TURN_COEFF = 0.01;    // Larger is more responsive, but also less stable
     static final double D_TURN_COEFF = -0.03;    // Larger is more responsive, but also less stable
-    static final double k_MOTOR_STALL_SPEED = 0.125;
-    static final double P_RAMP_COEFF = 0.00082;
+    static final double k_MOTOR_STALL_SPEED = 0.25;
+    static final double P_RAMP_COEFF = 0.00164;
 
     //defines orientation constants for beacons
     static final int BEACON_BLUE_RED = 2;
@@ -67,6 +67,8 @@ public class RobotBaseMarsRD implements SensorEventListener {
 
     float zero;
     float rawGyro;
+    float leftLiftPower;
+    float rightLiftPower;
 
     float[] rotationMatrix = new float[9];
     float[] orientation = new float[3];
@@ -91,12 +93,12 @@ public class RobotBaseMarsRD implements SensorEventListener {
     public Servo reloaderServo = null;
     public boolean hasBeenZeroed= false;
 
-    double timeToFinishReload;
+    double timeToFinishReload = -1;
 
     HardwareMap hwMap = null;
 
-    static final double RELOADER_CLOSED = 0.22; //0.35
-    static final double RELOADER_OPEN = 0.6; //0.75
+    static final double RELOADER_CLOSED = 0.32;
+    static final double RELOADER_OPEN = 0.6;
 
     OpMode callingOpMode;
     private SensorManager mSensorManager;
@@ -108,10 +110,13 @@ public class RobotBaseMarsRD implements SensorEventListener {
     public float zRotation;
     public double lastPicBeaconAvg;
 
+    boolean isReloadResetting = false;
+
     public long targetShooterPos = 0;
     public boolean shooterIsBusy = false;
     public boolean shooterIsNudged = false;
     public boolean touchToggle = false;
+    public boolean spinnerIsRunning = false;
 
     private static final double[] scaleArray = {0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
             0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00};
@@ -257,8 +262,8 @@ public class RobotBaseMarsRD implements SensorEventListener {
 
             correction = Range.clip(error * P_DRIVE_COEFF, -1, 1);
 
-            if(target > 1100) {
-                if (distanceFromInitial < 1100) {
+            if(target > 550) {
+                if (distanceFromInitial < 550) {
                     power = distanceFromInitial * P_RAMP_COEFF;
 
                     callingOpMode.telemetry.addData("Initial position", encoderInitialPos);
@@ -266,7 +271,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
                     callingOpMode.telemetry.addData("power: ", power);
                     callingOpMode.telemetry.update();
                 }
-                else if (errorFromEndpoint < 1100) {
+                else if (errorFromEndpoint < 550) {
                     power = errorFromEndpoint * P_RAMP_COEFF;
 
                     callingOpMode.telemetry.addData("power: ", power);
@@ -274,12 +279,12 @@ public class RobotBaseMarsRD implements SensorEventListener {
                 }
             }
 
-            if(Math.abs(power) < 0.25) {
+            if(Math.abs(power) < k_MOTOR_STALL_SPEED) {
                 if(power >= 0) {
-                    power = 0.25;
+                    power = k_MOTOR_STALL_SPEED;
                 }
                 else {
-                    power = -0.25;
+                    power = -k_MOTOR_STALL_SPEED;
                 }
             }
 
@@ -485,18 +490,35 @@ public class RobotBaseMarsRD implements SensorEventListener {
         }
         updateDriveMotors(0, 0, false);
     }
-
     public boolean reloadHandler(boolean reloadRequested) {
-        if(reloadRequested && reloadResetTime == -1) {
+        if(reloadRequested && reloadResetTime == -1 && !isReloadResetting) {
             reloaderServo.setPosition(RELOADER_OPEN);
             reloadResetTime = callingOpMode.getRuntime() + 0.4;
             timeToFinishReload = callingOpMode.getRuntime() + 0.8;
+            return true;
         }
         else if(callingOpMode.getRuntime() > reloadResetTime && reloadResetTime != -1) {
             reloaderServo.setPosition(RELOADER_CLOSED);
             reloadResetTime = -1;
+            isReloadResetting = true;
+            return true;
         }
-        return callingOpMode.getRuntime() < timeToFinishReload;
+        else if(callingOpMode.getRuntime() < timeToFinishReload) {
+            return true;
+        }
+        isReloadResetting = false;
+        return false;
+    }
+
+    public void lifterHandler(float leftPower, float rightPower){
+        leftLiftPower = Range.clip(rightPower, -1, 1);
+        rightLiftPower = Range.clip(leftPower, -1, 1);
+
+        rightLiftPower = (float)scaleInput(rightPower);
+        leftLiftPower =  (float)scaleInput(leftPower);
+
+        motorLifterRight.setPower(rightLiftPower);
+        motorLifterLeft.setPower(leftLiftPower);
     }
 
     /**
@@ -535,6 +557,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
 
         //case 0 - shoot isn't busy and nothing is requested
         if (!shooterIsBusy && !manualRequested && !shotRequested){
+            motorShooter.setPower(0);
             return false;
         }
 
@@ -548,22 +571,24 @@ public class RobotBaseMarsRD implements SensorEventListener {
         else if (!shooterIsBusy && shotRequested){
             motorShooter.setPower(0.7);
             shooterIsBusy = true;
+            touchToggle = false;
             return true;
         }
 
         // case 3 - shoot is busy and touch sensor not yet released (active)
         else if (shooterIsBusy && touchShooter.isPressed() && !touchToggle){
-            touchToggle = true;
             return true;
         }
 
         // case 4 - shoot is still busy and touch sensor is released (not active)
         else if (shooterIsBusy && !touchShooter.isPressed()){
+            touchToggle = true;
             return true;
         }
 
         // case 5 - shoot is busy and touch sensor has been released but is now active
         else if (shooterIsBusy && touchToggle && touchShooter.isPressed()){
+            shooterIsBusy = false;
             motorShooter.setPower(0);
             return false;
         }
@@ -659,7 +684,11 @@ public class RobotBaseMarsRD implements SensorEventListener {
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        driveStraight(-8, -0.5, outHeading);
+        driveStraight(-20, -0.5, outHeading);
+    }
+
+    public void setMotorSpinner(double power) {
+        motorSpinner.setPower(power);
     }
 
     public void deconstruct(){
@@ -721,4 +750,12 @@ public class RobotBaseMarsRD implements SensorEventListener {
         return touchShooter.isPressed();
     }
 
+    public boolean spinnerIsRunning() {
+        if(motorSpinner.getPower() != 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }

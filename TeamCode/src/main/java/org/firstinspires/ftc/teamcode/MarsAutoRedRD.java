@@ -3,11 +3,11 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-@Autonomous(name="Mars BlueRD", group="Blue")
-public class MarsAutoBlueRD extends LinearOpMode {
+@Autonomous(name="Mars RedRD", group="red")
+public class MarsAutoRedRD extends LinearOpMode {
 
     RobotBaseMarsRD robotBase;
-    boolean debug = true;
+    boolean debug = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -36,16 +36,16 @@ public class MarsAutoBlueRD extends LinearOpMode {
 
         //initial drive
 
-        if(opModeIsActive()) robotBase.driveStraight(23, 0);
+        if(opModeIsActive()) robotBase.driveStraight(25, 0);
 
         //turns parallel to ramp
-        if(opModeIsActive()) robotBase.turn(38);
+        if(opModeIsActive()) robotBase.turn(322);
 
-        //second drive to align the robot to the first beacon one one axis
-        if(opModeIsActive()) robotBase.driveStraight(24, 38);
+        //second drive to align the robot to the first beacon on one axis
+        if(opModeIsActive()) robotBase.driveStraight(24, 322);
 
         //turns robot to face beacon
-        if(opModeIsActive()) robotBase.turn(85);
+        if(opModeIsActive()) robotBase.turn(275);
 
         //waits for robot to come to rest, then takes picture to determine beacon orientation
         if(opModeIsActive()) sleep(500);
@@ -54,7 +54,7 @@ public class MarsAutoBlueRD extends LinearOpMode {
         if(opModeIsActive()) pos = robotBase.takePicture();
 
         //do some math to determine the angle the robot should drive to the beacon with
-        shiftedAvg = ((90 - robotBase.getZRotation()) * robotBase.PIXELS_PER_DEGREE) + robotBase.getLastPicBeaconAvg();
+        shiftedAvg = ((270 - robotBase.getZRotation()) * robotBase.PIXELS_PER_DEGREE) + robotBase.getLastPicBeaconAvg();
         deltaX = (340 - shiftedAvg)/robotBase.PIXELS_PER_INCH;
         correctionAngle = Math.toDegrees(Math.atan(deltaX/30.));
 
@@ -73,31 +73,31 @@ public class MarsAutoBlueRD extends LinearOpMode {
         telemetry.update();
 
         if (pos == RobotBasePolaris.BEACON_RED_BLUE){
-            if(opModeIsActive()) robotBase.turn(100 +(float)correctionAngle);
+            if(opModeIsActive()) robotBase.turn(270 +(float)correctionAngle);
             try {
-                if(opModeIsActive()) robotBase.pushButton(100 + (int)correctionAngle, 100, 2);
+                if(opModeIsActive()) robotBase.pushButton(270 + (int)correctionAngle, 270, 2);
             }
             catch (TimeoutException e) {
-                if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 100);
+                if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 270);
             }
         }
         else if (pos == RobotBasePolaris.BEACON_BLUE_RED) {
             try {
-                if(opModeIsActive()) robotBase.pushButton(90 + (int)correctionAngle, 90, 2);
+                if(opModeIsActive()) robotBase.pushButton(280 + (int)correctionAngle, 280, 2);
             }
             catch (TimeoutException e) {
-                if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 90);
+                if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 280);
             }
         }
 
-        if(opModeIsActive()) robotBase.turn(300);
+        if(opModeIsActive()) robotBase.turn(122);
 
 
-        while (opModeIsActive() && robotBase.shooterHandler(true, false));
-        while (opModeIsActive() && robotBase.reloadHandler(true));
-        while (opModeIsActive() && robotBase.shooterHandler(true, false));
+        while(opModeIsActive() && robotBase.shooterHandler(true, false)) ;
+        while(opModeIsActive() && robotBase.reloadHandler(true));
+        while(opModeIsActive() && robotBase.shooterHandler(true, false)) ;
 
-        if (opModeIsActive()) sleep(1000);
+        if(opModeIsActive()) sleep(1000);
 
         if (debug)
             System.out.println("SSS reloaderPos @end: " + robotBase.reloaderServo.getPosition());
