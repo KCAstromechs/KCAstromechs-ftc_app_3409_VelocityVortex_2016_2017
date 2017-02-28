@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import java.sql.Time;
 
+@Disabled
 @Autonomous(name="BeaconAutoRedBackup", group="Backup")
 public class AutoRedPos1 extends LinearOpMode {
 
