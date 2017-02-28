@@ -118,6 +118,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
     public boolean touchToggle = false;
     public boolean spinnerIsRunning = false;
     static boolean reloadJustFinished = false;
+    public boolean reloadAfterShot = false;
 
 
     private static final double[] scaleArray = {0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
@@ -561,15 +562,16 @@ public class RobotBaseMarsRD implements SensorEventListener {
     public boolean shooterHandler(boolean shotRequested, boolean manualRequested){
 
         //case 0 - shoot isn't busy and nothing is requested
-        if (!shooterIsBusy && !manualRequested && !shotRequested){
+        if ((!shooterIsBusy && !manualRequested && !shotRequested) || callingOpMode.getRuntime() < timeToFinishReload){
             motorShooter.setPower(0);
             return false;
         }
 
         // case 1 - shoot isn't busy and manual is requested
-        else if (!shooterIsBusy && manualRequested){
+        else if (manualRequested){
             motorShooter.setPower(0.7);
-            return true;
+            shooterIsBusy = false;
+            return false;
         }
 
         // case 2 - shooter isn't busy and shot was requested
@@ -595,6 +597,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
         else if (shooterIsBusy && touchToggle && touchShooter.isPressed()){
             shooterIsBusy = false;
             motorShooter.setPower(0);
+            if (reloadAfterShot) reloadHandler(true);
             return false;
         }
         return false;
@@ -763,4 +766,6 @@ public class RobotBaseMarsRD implements SensorEventListener {
             return false;
         }
     }
+
+    public void setReloadAfterShot (boolean _reload) { reloadAfterShot = _reload; }
 }
