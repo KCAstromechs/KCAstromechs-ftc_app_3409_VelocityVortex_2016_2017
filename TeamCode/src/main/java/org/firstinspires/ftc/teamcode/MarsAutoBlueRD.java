@@ -103,7 +103,7 @@ public class MarsAutoBlueRD extends LinearOpMode {
             System.out.println("SSS reloaderPos @end: " + robotBase.reloaderServo.getPosition());
 
         if(opModeIsActive()) robotBase.turn(0);
-        if(opModeIsActive()) robotBase.driveStraight(45, 0);
+        if(opModeIsActive()) robotBase.driveStraight(44, 0);
 
         if(opModeIsActive()) robotBase.turn(85);
         if(opModeIsActive()) sleep(500);
@@ -131,7 +131,7 @@ public class MarsAutoBlueRD extends LinearOpMode {
         if (pos == RobotBasePolaris.BEACON_RED_BLUE){
             if(opModeIsActive()) robotBase.turn(100 +(float)correctionAngle);
             try {
-                if(opModeIsActive()) robotBase.pushButton(100 + (int)correctionAngle, 100, 2);
+                if(opModeIsActive()) robotBase.pushButton(100 + (int)correctionAngle, 100, 3);
             }
             catch (TimeoutException e) {
                 if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 100);
@@ -139,7 +139,7 @@ public class MarsAutoBlueRD extends LinearOpMode {
         }
         else if (pos == RobotBasePolaris.BEACON_BLUE_RED) {
             try {
-                if(opModeIsActive()) robotBase.pushButton(90 + (int)correctionAngle, 90, 2);
+                if(opModeIsActive()) robotBase.pushButton(90 + (int)correctionAngle, 90, 3);
             }
             catch (TimeoutException e) {
                 if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 90);
