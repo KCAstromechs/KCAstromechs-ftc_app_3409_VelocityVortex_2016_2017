@@ -97,48 +97,63 @@ public class MarsAutoBlueRD extends LinearOpMode {
         while (opModeIsActive() && robotBase.reloadHandler(true));
         while (opModeIsActive() && robotBase.shooterHandler(true, false));
 
-        if (opModeIsActive()) sleep(1000);
+        if (opModeIsActive()) sleep(451);
 
         if (debug)
             System.out.println("SSS reloaderPos @end: " + robotBase.reloaderServo.getPosition());
 
+        if(opModeIsActive()) robotBase.turn(0);
+        if(opModeIsActive()) robotBase.driveStraight(45, 0);
 
-        /*
-        robotBase.turn(0);
-        robotBase.driveStraight(48, 0);
+        if(opModeIsActive()) robotBase.turn(85);
+        if(opModeIsActive()) sleep(500);
+        if(opModeIsActive()) pos = robotBase.takePicture();
 
-        robotBase.turn(90);
-        sleep(2000);
-        pos = robotBase.takePicture();
-
-        telemetry.addData("",pos);
-        telemetry.update();
-
-
+        //do some math to determine the angle the robot should drive to the beacon with
         shiftedAvg = ((90 - robotBase.getZRotation()) * robotBase.PIXELS_PER_DEGREE) + robotBase.getLastPicBeaconAvg();
         deltaX = (340 - shiftedAvg)/robotBase.PIXELS_PER_INCH;
         correctionAngle = Math.toDegrees(Math.atan(deltaX/30.));
 
+        //outputs beacon info for testing purposes
+        if (debug) {
+            System.out.println("px per degree: " + robotBase.PIXELS_PER_DEGREE);
+            System.out.println("lastPicBeaconAvg: " + robotBase.getLastPicBeaconAvg());
+            System.out.println("zRotation: " + robotBase.getZRotation());
+            System.out.println("shiftedAvg: " + shiftedAvg);
+            System.out.println("deltaX: " + deltaX);
+            System.out.println("correctionAngle: " + correctionAngle);
+            System.out.println(pos);
+        }
 
-        //push chosen button0
+        telemetry.addData("pos ", pos);
+        telemetry.update();
+
         if (pos == RobotBasePolaris.BEACON_RED_BLUE){
-            robotBase.turn(108 + (float)correctionAngle);
-            try {robotBase.pushButton(108 + (int)correctionAngle, 108, 2);}
+            if(opModeIsActive()) robotBase.turn(100 +(float)correctionAngle);
+            try {
+                if(opModeIsActive()) robotBase.pushButton(100 + (int)correctionAngle, 100, 2);
+            }
             catch (TimeoutException e) {
-                robotBase.driveStraight(-12, -0.5, 108);
+                if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 100);
             }
         }
         else if (pos == RobotBasePolaris.BEACON_BLUE_RED) {
-            try {robotBase.pushButton(90 + (int)correctionAngle, 90, 2);}
+            try {
+                if(opModeIsActive()) robotBase.pushButton(90 + (int)correctionAngle, 90, 2);
+            }
             catch (TimeoutException e) {
-                robotBase.driveStraight(-12, -0.5, 90);
+                if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 90);
             }
         }
 
+        if(opModeIsActive()) robotBase.turn(218);
+
+        if(opModeIsActive()) robotBase.driveStraight(48, 218);
+
+        if(opModeIsActive()) sleep(1000);
+
         robotBase.deconstruct();
         robotBase = null;
-
-        */
     }
 
 }
