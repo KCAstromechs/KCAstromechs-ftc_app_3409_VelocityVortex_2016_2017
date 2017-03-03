@@ -129,9 +129,9 @@ public class MarsAutoBlue90 extends LinearOpMode {
         telemetry.update();
 
         if (pos == RobotBasePolaris.BEACON_RED_BLUE){
-            if(opModeIsActive()) robotBase.turn(100 +(float)correctionAngle);
+            if(opModeIsActive()) robotBase.turn(105 +(float)correctionAngle);
             try {
-                if(opModeIsActive()) robotBase.pushButton(100 + (int)correctionAngle, 100, 3);
+                if(opModeIsActive()) robotBase.pushButton(105 + (int)correctionAngle, 100, 3);
             }
             catch (TimeoutException e) {
                 if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 100);
