@@ -41,38 +41,43 @@ import android.graphics.Bitmap;
 import static android.content.Context.SENSOR_SERVICE;
 
 public class RobotBaseMarsRD implements SensorEventListener {
+    //encoder ticks per one inch
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    
     static final double COUNTS_PER_MOTOR_REV = 1100;    // NeveRest Motor Encoder
     static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
-    static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
-    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double driveSpeed = 0.3;     // Default drive speed for better accuracy.
-    static final double turnSpeed = 0.5;      // Default turn speed for better accuracy.
-    static final double P_DRIVE_COEFF = 0.02;    // Larger is more responsive, but also less stable
-    static final double P_TURN_COEFF = 0.0125;    // Larger is more responsive, but also less stable
-    static final double D_TURN_COEFF = -0.03;    // Larger is more responsive, but also less stable
-    static final double k_MOTOR_STALL_SPEED = 0.25;
-    static final double P_RAMP_COEFF = 0.00164;
-
+    static final double WHEEL_DIAMETER_INCHES = 4.0;    // For figuring circumference
+    static final double driveSpeed = 0.3;               // Default drive speed for better accuracy.
+    static final double turnSpeed = 0.5;                // Default turn speed for better accuracy.
+    static final double P_DRIVE_COEFF = 0.02;           // Larger is more responsive, but also less stable
+    static final double P_TURN_COEFF = 0.0125;          // Larger is more responsive, but also less stable
+    static final double D_TURN_COEFF = -0.03;           // Larger is more responsive, but also less stable
+    static final double k_MOTOR_STALL_SPEED = 0.25;     //Minimum speed at which robot can turn
+    static final double P_RAMP_COEFF = 0.00164;         //Propotional constant for driveStraight
+    
     //defines orientation constants for beacons
-    static final int BEACON_BLUE_RED = 2;
-    static final int BEACON_RED_BLUE = 1;
-
-    public static double reloadResetTime = -1;
-
-    private boolean debug = false;
-
-    final int PIXELS_PER_INCH = 35;
-
-    final int PIXELS_PER_DEGREE = 22;
-
+    static final int BEACON_BLUE_RED = 2; 
+    static final int BEACON_RED_BLUE = 1; 
+    
+    public static double reloadResetTime = -1; 
+    
+    private boolean debug = false;                      //indicates whether we want to dump data
+    
+    //constants used in angle analysis (picture)
+    final int PIXELS_PER_INCH = 35;                     
+    final int PIXELS_PER_DEGREE = 22;                   
+    
+    //variables for gyro operation
     float zero;
     float rawGyro;
+    
     float leftLiftPower;
     float rightLiftPower;
-
+    
+    //arrays for gyro operation
     float[] rotationMatrix = new float[9];
     float[] orientation = new float[3];
-
+    
     int index;
     double dScale;
 
@@ -96,11 +101,14 @@ public class RobotBaseMarsRD implements SensorEventListener {
     double timeToFinishReload = -1;
 
     HardwareMap hwMap = null;
-
+    
+    //sets positions for ball indexer (servo)
     static final double RELOADER_CLOSED = 0.32;
     static final double RELOADER_OPEN = 0.6;
 
     OpMode callingOpMode;
+    
+    //more required vars for gyro operation
     private SensorManager mSensorManager;
     private Sensor mRotationVectorSensor;
 
@@ -108,11 +116,12 @@ public class RobotBaseMarsRD implements SensorEventListener {
     // Possible values are:  0-360
     // 0 is set as straight ahead of the robot, 90 is the right, 270 is to the left
     public float zRotation;
+    
     public double lastPicBeaconAvg;
-
+    
     boolean isReloadResetting = false;
-
-    public long targetShooterPos = 0;
+    
+    public long targetShooterPos = 0;       
     public boolean shooterIsBusy = false;
     public boolean shooterIsNudged = false;
     public boolean touchToggle = false;
@@ -120,10 +129,10 @@ public class RobotBaseMarsRD implements SensorEventListener {
     static boolean reloadJustFinished = false;
     public boolean reloadAfterShot = false;
 
-
+    //defines each possible amount of power we are able to give to the motor based on joystick
     private static final double[] scaleArray = {0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
             0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00};
-
+    
     VuforiaLocalizer vuforia;
 
     /**
@@ -132,13 +141,12 @@ public class RobotBaseMarsRD implements SensorEventListener {
      * @param _callingOpMode
      */
     public void init(HardwareMap ahwMap, OpMode _callingOpMode) {
-
+        // Save reference to OpMode
         callingOpMode = _callingOpMode;
         // Save reference to Hardware map
         hwMap = ahwMap;
 
         // Define and Initialize Motors
-
         motorFrontLeft = hwMap.dcMotor.get("frontLeft");
         motorBackLeft = hwMap.dcMotor.get("backLeft");
         motorFrontRight = hwMap.dcMotor.get("frontRight");
@@ -168,11 +176,14 @@ public class RobotBaseMarsRD implements SensorEventListener {
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        // Define and initialize ALL installed servos.
-
+        // Define and initialize servos.
         reloaderServo = hwMap.servo.get("reloader");
+        
+        // Define and initialize touch sensors
         touchShooter = hwMap.touchSensor.get("touchShooter");
         touchPow = hwMap.touchSensor.get("touchPow");
+        
+        //resets all encoders
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -182,13 +193,16 @@ public class RobotBaseMarsRD implements SensorEventListener {
         motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+        
+        //Accessing gyro and accelerometer from Android
         mSensorManager = (SensorManager) hwMap.appContext.getSystemService(SENSOR_SERVICE);
         mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
         mSensorManager.registerListener(this, mRotationVectorSensor, 10000);
-
+        
+        //moves servo to preset position
         reloaderServo.setPosition(RELOADER_CLOSED);
-
+        
+        //tells user initialization sequence is completed
         callingOpMode.telemetry.addData(">", "Robot Ready.");    //
         callingOpMode.telemetry.update();
     }
