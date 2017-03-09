@@ -90,7 +90,7 @@ public class MarsAutoBlue100 extends LinearOpMode {
             }
         }
 
-        if(opModeIsActive()) robotBase.turn(300);
+        if(opModeIsActive()) robotBase.turn(314);
 
 
         while (opModeIsActive() && robotBase.shooterHandler(true, false));
@@ -103,7 +103,7 @@ public class MarsAutoBlue100 extends LinearOpMode {
             System.out.println("SSS reloaderPos @end: " + robotBase.reloaderServo.getPosition());
 
         if(opModeIsActive()) robotBase.turn(0);
-        if(opModeIsActive()) robotBase.driveStraight(44, 0);
+        if(opModeIsActive()) robotBase.driveStraight(43, 0);
 
         if(opModeIsActive()) robotBase.turn(85);
         if(opModeIsActive()) sleep(500);
@@ -112,7 +112,7 @@ public class MarsAutoBlue100 extends LinearOpMode {
         //do some math to determine the angle the robot should drive to the beacon with
         shiftedAvg = ((90 - robotBase.getZRotation()) * robotBase.PIXELS_PER_DEGREE) + robotBase.getLastPicBeaconAvg();
         deltaX = (340 - shiftedAvg)/robotBase.PIXELS_PER_INCH;
-        correctionAngle = Math.toDegrees(Math.atan(deltaX/30.));
+        correctionAngle = Math.toDegrees(Math.atan(deltaX/20.));
 
         //outputs beacon info for testing purposes
         if (debug) {

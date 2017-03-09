@@ -112,7 +112,7 @@ public class MarsAutoRed90 extends LinearOpMode {
         //do some math to determine the angle the robot should drive to the beacon with
         shiftedAvg = ((270 - robotBase.getZRotation()) * robotBase.PIXELS_PER_DEGREE) + robotBase.getLastPicBeaconAvg();
         deltaX = (340 - shiftedAvg)/robotBase.PIXELS_PER_INCH;
-        correctionAngle = Math.toDegrees(Math.atan(deltaX/30.));
+        correctionAngle = Math.toDegrees(Math.atan(deltaX/20.));
 
         //outputs beacon info for testing purposes
         if (debug) {
