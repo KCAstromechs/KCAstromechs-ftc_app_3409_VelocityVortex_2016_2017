@@ -91,7 +91,6 @@ public class MarsAutoRed60 extends LinearOpMode {
 
         if (opModeIsActive()) robotBase.turn(122);                  //Turn the robot to the angle to shoot into the center vortex
 
-
         //Shoot, then reload sequence, then shoot again
         while (opModeIsActive() && robotBase.shooterHandler(true, false)) ;
         while (opModeIsActive() && robotBase.reloadHandler(true)) ;
