@@ -25,34 +25,63 @@ public class MarsTeleopRD extends OpMode{
 
     @Override
     public void loop(){
+        //Will uncomment this when lifter is mechanically implemented
         //robotBase.lifterHandler(gamepad2.left_stick_y, gamepad2.right_stick_y);
 
+        //Starts automatic shot sequence on either gamepad's left bumper,
+        // and manually adjusts position of shooter on either gamepad's left trigger
         robotBase.shooterHandler(gamepad1.left_bumper || gamepad2.left_bumper, gamepad1.left_trigger > 0.2 || gamepad2.left_trigger > 0.2);
 
+        //manually reloads a ball when gamepad2's right bumper is activated
         robotBase.reloadHandler(gamepad2.right_bumper);
 
+
+
+
+        //Case 3: Button "A" is being pressed but spinner is off
+
+        //Case 4: Button "A" is n
+
+        //Case 5:
+
+
+        //Case 1: Button "B" is pressed, so run spinner in reverse
         if(gamepad1.b || gamepad2.b) {
             robotBase.setMotorSpinner(-1.0);
             bReleased = true;
-        } else if (!(gamepad1.b || gamepad2.b) && bReleased) {
+        }
+
+        //Case 2: Button "B" not pressed, but pressed last time through loop, so turn spinner off
+        else if (!(gamepad1.b || gamepad2.b) && bReleased) {
             robotBase.setMotorSpinner(0);
             bReleased = false;
-        } else if (!robotBase.spinnerIsRunning()) {
+        }
+        //As long as the spinner is off...
+        else if (!robotBase.spinnerIsRunning()) {
+            //Case 3: A is bring pressed, either has not been pressed or has been recently released, so run spinner forward
             if ((gamepad1.a || gamepad2.a) && released) {
                 robotBase.setMotorSpinner(1.0);
                 released = false;
-            } else if (!(gamepad1.a || gamepad2.a)) {
+            }
+            //Case 4: A is not being pressed, so allow to enter Cases 3&5 again
+            else if (!(gamepad1.a || gamepad2.a)) {
                 released = true;
             }
-        } else {
+        }
+        //As long as the spinner is on...
+        else {
+            //Case 5: A is being pressed, either has not been pressed or has been recently released, so turn the spinner off
             if ((gamepad1.a || gamepad2.a) && released) {
                 robotBase.setMotorSpinner(0);
                 released = false;
-            } else if (!(gamepad1.a || gamepad2.a)) {
+            }
+            //Case 6: A is not being pressed, so allow to enter Cases 3&5 again
+            else if (!(gamepad1.a || gamepad2.a)) {
                 released = true;
             }
         }
 
+        //Set power based on the joysticks, set 'slow mode' based on right bumper
         robotBase.updateDriveMotors(-gamepad1.left_stick_y, -gamepad1.right_stick_y, gamepad1.right_bumper);
     }
 }
