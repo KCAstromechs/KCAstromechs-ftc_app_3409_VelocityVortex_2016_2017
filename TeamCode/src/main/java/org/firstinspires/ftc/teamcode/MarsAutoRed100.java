@@ -29,6 +29,8 @@ public class MarsAutoRed100 extends LinearOpMode {
 
         robotBase.shooterHandler(false, false);
 
+        //All of that is set-up doing things like setting up the robotBase, cocking the shooter, setting up variables
+
         waitForStart();
 
         if (debug)
@@ -72,6 +74,7 @@ public class MarsAutoRed100 extends LinearOpMode {
         telemetry.addData("pos ", pos);
         telemetry.update();
 
+        //drive to actually hit the beacon's button
         if (pos == RobotBasePolaris.BEACON_RED_BLUE){
             if(opModeIsActive()) robotBase.turn(270 +(float)correctionAngle);
             try {
@@ -90,9 +93,11 @@ public class MarsAutoRed100 extends LinearOpMode {
             }
         }
 
+        //turn around to shoot into the center vortex
         if(opModeIsActive()) robotBase.turn(122);
 
 
+        //shoot into center vortex
         while(opModeIsActive() && robotBase.shooterHandler(true, false)) ;
         while(opModeIsActive() && robotBase.reloadHandler(true));
         while(opModeIsActive() && robotBase.shooterHandler(true, false)) ;
@@ -102,9 +107,11 @@ public class MarsAutoRed100 extends LinearOpMode {
         if (debug)
             System.out.println("SSS reloaderPos @end: " + robotBase.reloaderServo.getPosition());
 
+        //drive to second beacon
         if(opModeIsActive()) robotBase.turn(0);
         if(opModeIsActive()) robotBase.driveStraight(44, 0);
 
+        //turn to beacon and take picture
         if(opModeIsActive()) robotBase.turn(275);
         if(opModeIsActive()) sleep(500);
         if(opModeIsActive()) pos = robotBase.takePicture();
@@ -128,6 +135,7 @@ public class MarsAutoRed100 extends LinearOpMode {
         telemetry.addData("pos ", pos);
         telemetry.update();
 
+        //drive to actually hit the beacon's button
         if (pos == RobotBasePolaris.BEACON_RED_BLUE){
             if(opModeIsActive()) robotBase.turn(270 +(float)correctionAngle);
             try {
@@ -146,12 +154,15 @@ public class MarsAutoRed100 extends LinearOpMode {
             }
         }
 
+        //turn to go hit the ball and park on the center
         if(opModeIsActive()) robotBase.turn(142);
 
+        //go hit the ball and park on the center
         if(opModeIsActive()) robotBase.driveStraight(48, 142);
 
         if(opModeIsActive()) sleep(1000);
 
+        //clean up the mess we made
         robotBase.deconstruct();
         robotBase = null;
     }

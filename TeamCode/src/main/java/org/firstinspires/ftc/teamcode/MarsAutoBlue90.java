@@ -29,6 +29,8 @@ public class MarsAutoBlue90 extends LinearOpMode {
 
         robotBase.shooterHandler(false, false);
 
+        //All of that is set-up doing things like setting up the robotBase, cocking the shooter, setting up variables
+
         waitForStart();
 
         if (debug)
@@ -72,10 +74,11 @@ public class MarsAutoBlue90 extends LinearOpMode {
         telemetry.addData("pos ", pos);
         telemetry.update();
 
+        //drive to actually hit the beacon's button
         if (pos == RobotBasePolaris.BEACON_RED_BLUE){
-            if(opModeIsActive()) robotBase.turn(100 +(float)correctionAngle);
+            if(opModeIsActive()) robotBase.turn(105 +(float)correctionAngle);
             try {
-                if(opModeIsActive()) robotBase.pushButton(100 + (int)correctionAngle, 100, 2);
+                if(opModeIsActive()) robotBase.pushButton(105 + (int)correctionAngle, 100, 2);
             }
             catch (TimeoutException e) {
                 if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 100);
@@ -90,9 +93,11 @@ public class MarsAutoBlue90 extends LinearOpMode {
             }
         }
 
+        //turn around to shoot into the center vortex
         if(opModeIsActive()) robotBase.turn(314);
 
 
+        //shoot into center vortex
         while (opModeIsActive() && robotBase.shooterHandler(true, false));
         while (opModeIsActive() && robotBase.reloadHandler(true));
         while (opModeIsActive() && robotBase.shooterHandler(true, false));
@@ -102,9 +107,11 @@ public class MarsAutoBlue90 extends LinearOpMode {
         if (debug)
             System.out.println("SSS reloaderPos @end: " + robotBase.reloaderServo.getPosition());
 
+        //drive to second beacon
         if(opModeIsActive()) robotBase.turn(0);
         if(opModeIsActive()) robotBase.driveStraight(43, 0);
 
+        //turn to beacon and take picture
         if(opModeIsActive()) robotBase.turn(85);
         if(opModeIsActive()) sleep(500);
         if(opModeIsActive()) pos = robotBase.takePicture();
@@ -128,10 +135,11 @@ public class MarsAutoBlue90 extends LinearOpMode {
         telemetry.addData("pos ", pos);
         telemetry.update();
 
+        //drive to actually hit the beacon's button
         if (pos == RobotBasePolaris.BEACON_RED_BLUE){
-            if(opModeIsActive()) robotBase.turn(105 +(float)correctionAngle);
+            if(opModeIsActive()) robotBase.turn(100 +(float)correctionAngle);
             try {
-                if(opModeIsActive()) robotBase.pushButton(105 + (int)correctionAngle, 100, 3);
+                if(opModeIsActive()) robotBase.pushButton(100 + (int)correctionAngle, 100, 3);
             }
             catch (TimeoutException e) {
                 if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 100);
@@ -148,6 +156,7 @@ public class MarsAutoBlue90 extends LinearOpMode {
 
         if(opModeIsActive()) sleep(1000);
 
+        //clean up the mess we made
         robotBase.deconstruct();
         robotBase = null;
     }
