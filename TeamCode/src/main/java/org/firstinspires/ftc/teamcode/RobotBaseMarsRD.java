@@ -353,6 +353,92 @@ public class RobotBaseMarsRD implements SensorEventListener {
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+    public int takeLongDistancePicture() throws InterruptedException {
+        int thisR, thisB, thisG;                    //RGB values of current pixel to translate into HSV
+        int xRedAvg = 0;                            //Average X position of red pixels to help find red side location
+        int xBlueAvg = 0;                           //Average X position of blue pixels to help find blue side location
+        int totalBlue = 1;                          //Total number of blue pixels to help find blue side location
+        int totalRed = 1;                           //Total number of red pixels to help find red side location
+        int xRedSum = 0;                            //Added-up X pos of red pixels to find red side location
+        int xBlueSum = 0;                           //Added-up X pos of blue pix to find blue side location
+        int idx = 0;                                //Ensures we get correct image type from Vuforia
+        float[] hsv = new float[3];                 //Array to hold Hue, Saturation, Value values for each pixel
+        float thisH;                                //Hue value of current pixel to find its color
+
+        //If Vuforia has not yet started, we're screwed. Start it up now in the name of hope
+        if(vuforia == null) initVuforia();
+
+        //Take an image from Vuforia in the correct format
+        VuforiaLocalizer.CloseableFrame frame = vuforia.getFrameQueue().take();
+        for (int i = 0; i < frame.getNumImages(); i++) {
+            if (frame.getImage(i).getFormat() == PIXEL_FORMAT.RGB888) {
+                idx = i;
+                break;
+            }
+        }
+
+        //Create an instance of the image and then of the pixels
+        Image image = frame.getImage(idx);
+        ByteBuffer px = image.getPixels();
+
+        //Loop through every pixel column
+        int h = image.getHeight();
+        int w = image.getWidth();
+        for (int i = 15; i < 150; i++) { //h
+
+            //If the bot stops you should really stop.
+            if(Thread.interrupted()) break;
+
+            //Loop through a certain number of rows to cover a certain area of the image
+            for (int j = 650; j < 750; j++) { //925, 935 // w
+
+                //Take the RGB vals of current pix
+                thisR = px.get(i * w * 3 + (j * 3)) & 0xFF;
+                thisG = px.get(i * w * 3 + (j * 3) + 1) & 0xFF;
+                thisB = px.get(i * w * 3 + (j * 3) + 2) & 0xFF;
+
+                //If the pixel is bright enough that we know it's from the beacon
+                if (thisB > 230 || thisG > 230 || thisR > 230) {
+
+                    //Convert the RGB vals into the HSV array
+                    Color.RGBToHSV(thisR, thisG, thisB, hsv);
+
+                    //Get the hue
+                    thisH = hsv[0];
+
+                    //We now have the colors (one byte each) for any pixel, (j, i) so we can add to the totals
+                    if (thisH <= 220 && thisH >= 180) {
+                        totalBlue++;
+                        xBlueSum += i;
+                    } else if (thisH <= 360 && thisH >= 330) {
+                        totalRed++;
+                        xRedSum += i;
+                    }
+                }
+            }
+        }
+
+        //Find the averages
+        xRedAvg = xRedSum / totalRed;
+        xBlueAvg = xBlueSum / totalBlue;
+        lastPicBeaconAvg = (xBlueAvg + xRedAvg) / 2.0;
+
+
+        if(debug)
+        {
+            System.out.println("SSS");
+            System.out.println("SSS width=" + image.getWidth());
+            System.out.println("SSS height=" + image.getHeight());
+            System.out.println("SSS totalRed=" + totalRed);
+            System.out.println("SSS totalBlue=" + totalBlue);
+            System.out.println("SSS xRedSum=" + xRedSum);
+            System.out.println("SSS xBlueSum=" + xBlueSum);
+            System.out.println("SSS xRedAvg=" + xRedAvg);
+            System.out.println("SSS xBlueAvg=" + xBlueAvg);
+        }
+        return 0;
+    }
+
 
     /**
      * Stops to pull a picture from Vuforia and analyze it for beacon colors

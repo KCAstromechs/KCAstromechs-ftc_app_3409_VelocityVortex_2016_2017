@@ -33,11 +33,14 @@ public class AutoImageProccessTest extends LinearOpMode {
                 squaresOverlay = (RelativeLayout) View.inflate(appUtil.getActivity(), R.layout.beacon_line_up_squares, null);
                 squaresOverlay.findViewById(R.id.firstBeacon).setVisibility(View.VISIBLE);
                 squaresOverlay.findViewById(R.id.secondBeacon).setVisibility(View.VISIBLE);
+                squaresOverlay.findViewById(R.id.Origin).setVisibility(View.VISIBLE);
                 appUtil.getActivity().addContentView(squaresOverlay, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             }
         });
 
         waitForStart();
+
+        robotBase.setDebug(true);
 
         appUtil.synchronousRunOnUiThread(new Runnable() {
             @Override
@@ -49,7 +52,7 @@ public class AutoImageProccessTest extends LinearOpMode {
             }
         });
 
-        int pos = robotBase.takePicture();
+        int pos = robotBase.takeLongDistancePicture();
 
         if (pos == RobotBasePolaris.BEACON_RED_BLUE) {
             System.out.println("TTT BEACON_RED_BLUE");
