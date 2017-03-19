@@ -353,7 +353,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    public int takeLongDistancePicture() throws InterruptedException {
+    public BeaconOrientation takeLongDistancePicture() throws InterruptedException {
         int thisR, thisB, thisG;                    //RGB values of current pixel to translate into HSV
         int xRedAvg = 0;                            //Average X position of red pixels to help find red side location
         int xBlueAvg = 0;                           //Average X position of blue pixels to help find blue side location
@@ -362,8 +362,10 @@ public class RobotBaseMarsRD implements SensorEventListener {
         int xRedSum = 0;                            //Added-up X pos of red pixels to find red side location
         int xBlueSum = 0;                           //Added-up X pos of blue pix to find blue side location
         int idx = 0;                                //Ensures we get correct image type from Vuforia
+        int beacon1 = 0;
         float[] hsv = new float[3];                 //Array to hold Hue, Saturation, Value values for each pixel
         float thisH;                                //Hue value of current pixel to find its color
+
 
         //If Vuforia has not yet started, we're screwed. Start it up now in the name of hope
         if(vuforia == null) initVuforia();
@@ -421,12 +423,22 @@ public class RobotBaseMarsRD implements SensorEventListener {
         //Find the averages
         xRedAvg = xRedSum / totalRed;
         xBlueAvg = xBlueSum / totalBlue;
-        lastPicBeaconAvg = (xBlueAvg + xRedAvg) / 2.0;
+
+        if (totalBlue < 50 || totalRed < 50) {
+            beacon1 = 0;
+        }
+        else if (xRedAvg > xBlueAvg) {
+            beacon1 = BEACON_RED_BLUE;
+        }
+        else if (xBlueAvg > xRedAvg) {
+            beacon1 = BEACON_BLUE_RED;
+        }
+
 
 
         if(debug)
         {
-            System.out.println("SSS");
+            System.out.println("SSS FIRST BEACON DATA:");
             System.out.println("SSS width=" + image.getWidth());
             System.out.println("SSS height=" + image.getHeight());
             System.out.println("SSS totalRed=" + totalRed);
@@ -435,8 +447,92 @@ public class RobotBaseMarsRD implements SensorEventListener {
             System.out.println("SSS xBlueSum=" + xBlueSum);
             System.out.println("SSS xRedAvg=" + xRedAvg);
             System.out.println("SSS xBlueAvg=" + xBlueAvg);
+            System.out.println("SSS ");
+            System.out.println("SSS ");
+            System.out.println("SSS ");
         }
-        return 0;
+
+        totalRed  = 1;
+        totalBlue = 1;
+        xRedSum   = 0;
+        xBlueSum  = 0;
+        xRedAvg   = 0;
+        xBlueAvg  = 0;
+
+        //LOOP FOR SECOND BEACON
+        for (int i = 470; i < 550; i++) { //h
+
+            //If the bot stops you should really stop.
+            if(Thread.interrupted()) break;
+
+            //Loop through a certain number of rows to cover a certain area of the image
+            for (int j = 690; j < 777; j++) { //925, 935 // w
+
+                //Take the RGB vals of current pix
+                thisR = px.get(i * w * 3 + (j * 3)) & 0xFF;
+                thisG = px.get(i * w * 3 + (j * 3) + 1) & 0xFF;
+                thisB = px.get(i * w * 3 + (j * 3) + 2) & 0xFF;
+
+                //If the pixel is bright enough that we know it's from the beacon
+                if (thisB > 230 || thisG > 230 || thisR > 230) {
+
+                    //Convert the RGB vals into the HSV array
+                    Color.RGBToHSV(thisR, thisG, thisB, hsv);
+
+                    //Get the hue
+                    thisH = hsv[0];
+
+                    //We now have the colors (one byte each) for any pixel, (j, i) so we can add to the totals
+                    if (thisH <= 220 && thisH >= 180) {
+                        totalBlue++;
+                        xBlueSum += i;
+                    } else if (thisH <= 360 && thisH >= 330) {
+                        totalRed++;
+                        xRedSum += i;
+                    }
+                }
+            }
+        }
+
+        xRedAvg = xRedSum / totalRed;
+        xBlueAvg = xBlueSum / totalBlue;
+
+        if(debug)
+        {
+
+
+            System.out.println("SSS Second BEACON DATA:");
+            System.out.println("SSS width=" + image.getWidth());
+            System.out.println("SSS height=" + image.getHeight());
+            System.out.println("SSS totalRed=" + totalRed);
+            System.out.println("SSS totalBlue=" + totalBlue);
+            System.out.println("SSS xRedSum=" + xRedSum);
+            System.out.println("SSS xBlueSum=" + xBlueSum);
+            System.out.println("SSS xRedAvg=" + xRedAvg);
+            System.out.println("SSS xBlueAvg=" + xBlueAvg);
+            System.out.println("SSS ");
+            System.out.println("SSS ");
+            System.out.println("SSS ");
+        }
+        if (totalBlue < 50 || totalRed < 50 || beacon1 == 0 || xRedAvg == xBlueAvg) {
+            return BeaconOrientation.ORIENTATION_UNKNOWN;
+        }
+        else if (beacon1 == BEACON_RED_BLUE){
+            if (xRedAvg > xBlueAvg) {
+                return BeaconOrientation.RED_BLUE_RED_BLUE;
+            } else{
+                return BeaconOrientation.BLUE_RED_RED_BLUE;
+            }
+        }
+        else if (beacon1 == BEACON_BLUE_RED) {
+            if(xRedAvg > xBlueAvg) {
+                return BeaconOrientation.RED_BLUE_BLUE_RED;
+            } else {
+                return  BeaconOrientation.BLUE_RED_BLUE_RED;
+            }
+        }
+
+        return BeaconOrientation.ORIENTATION_UNKNOWN;
     }
 
 
