@@ -184,7 +184,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
         lifterLeftServo = hwMap.servo.get("left");
         lifterRightServo = hwMap.servo.get("right");
         grabberServo.setPosition(0);
-        lifterLeftServo.setPosition(0);
+        lifterLeftServo.setPosition(0.2);
         lifterRightServo.setPosition(0);
         
         // Define and initialize touch sensors

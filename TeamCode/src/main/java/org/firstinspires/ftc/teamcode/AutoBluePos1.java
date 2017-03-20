@@ -17,6 +17,7 @@ public class AutoBluePos1 extends LinearOpMode {
         robotBase.initVuforia();
         robotBase.setDebug(debug);
         int pos = -1;
+        BeaconOrientation picData;
         double shiftedAvg;
         double deltaX;
         double correctionAngle;
@@ -36,6 +37,8 @@ public class AutoBluePos1 extends LinearOpMode {
 
         if (debug)
             System.out.println("SSS reloaderPos @Start: " + robotBase.reloaderServo.getPosition());
+
+        picData = robotBase.takeLongDistancePicture();
 
         //initial drive
 
