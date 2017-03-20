@@ -83,6 +83,32 @@ public class MarsTeleopRD extends OpMode{
 
         //Set power based on the joysticks, set 'slow mode' based on right bumper
         robotBase.updateDriveMotors(-gamepad1.left_stick_y, -gamepad1.right_stick_y, gamepad1.right_bumper);
+
+        if(gamepad2.dpad_up){
+            robotBase.motorLifterLeft.setPower(-0.75);
+            robotBase.motorLifterRight.setPower(0.75);
+        } else if (gamepad2.dpad_down){
+            robotBase.motorLifterLeft.setPower(0.75);
+            robotBase.motorLifterRight.setPower(-0.75);
+        } else {
+            robotBase.motorLifterLeft.setPower(0);
+            robotBase.motorLifterRight.setPower(0);
+        }
+
+        if(gamepad2.dpad_right){
+            robotBase.lifterLeftServo.setPosition(0);
+            robotBase.lifterRightServo.setPosition(1);
+
+        } else if(gamepad2.dpad_left){
+            robotBase.lifterLeftServo.setPosition(1);
+            robotBase.lifterRightServo.setPosition(0);
+        }
+
+        if(gamepad2.x){
+            robotBase.grabberServo.setPosition(0);
+        } else if(gamepad2.y){
+            robotBase.grabberServo.setPosition(0.75);
+        }
     }
 }
 

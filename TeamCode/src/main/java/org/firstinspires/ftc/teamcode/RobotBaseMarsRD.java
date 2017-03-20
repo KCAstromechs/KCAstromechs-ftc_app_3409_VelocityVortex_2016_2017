@@ -94,6 +94,9 @@ public class RobotBaseMarsRD implements SensorEventListener {
     public TouchSensor touchPow = null;
     public TouchSensor touchShooter = null;
     public Servo reloaderServo = null;
+    public Servo grabberServo = null;
+    public Servo lifterLeftServo = null;
+    public Servo lifterRightServo = null;
 
     //Allows the program to decide whether to set a default 'zero' orientation
     public boolean hasBeenZeroed= false;
@@ -157,6 +160,9 @@ public class RobotBaseMarsRD implements SensorEventListener {
         motorLifterLeft = hwMap.dcMotor.get("lifterLeft");
         motorLifterRight = hwMap.dcMotor.get("lifterRight");
 
+        motorLifterLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorLifterRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         //Sets motors to drive in the correct directions
         motorFrontLeft.setDirection(DcMotor.Direction.FORWARD);
         motorBackLeft.setDirection(DcMotor.Direction.FORWARD);
@@ -174,6 +180,12 @@ public class RobotBaseMarsRD implements SensorEventListener {
 
         // Define and initialize servos.
         reloaderServo = hwMap.servo.get("reloader");
+        grabberServo = hwMap.servo.get("grabber");
+        lifterLeftServo = hwMap.servo.get("left");
+        lifterRightServo = hwMap.servo.get("right");
+        grabberServo.setPosition(0);
+        lifterLeftServo.setPosition(0);
+        lifterRightServo.setPosition(0);
         
         // Define and initialize touch sensors
         touchShooter = hwMap.touchSensor.get("touchShooter");
