@@ -11,13 +11,16 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
 import com.vuforia.Image;
@@ -94,7 +97,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
     public TouchSensor touchPow = null;
     public TouchSensor touchShooter = null;
     public Servo reloaderServo = null;
-    public Servo grabberServo = null;
+    public CRServo grabberServo = null;
     public Servo lifterLeftServo = null;
     public Servo lifterRightServo = null;
 
@@ -180,10 +183,10 @@ public class RobotBaseMarsRD implements SensorEventListener {
 
         // Define and initialize servos.
         reloaderServo = hwMap.servo.get("reloader");
-        grabberServo = hwMap.servo.get("grabber");
+        grabberServo = hwMap.crservo.get("grabber");
         lifterLeftServo = hwMap.servo.get("left");
         lifterRightServo = hwMap.servo.get("right");
-        grabberServo.setPosition(0);
+        grabberServo.setPower(0);
         lifterLeftServo.setPosition(0.2);
         lifterRightServo.setPosition(0);
         

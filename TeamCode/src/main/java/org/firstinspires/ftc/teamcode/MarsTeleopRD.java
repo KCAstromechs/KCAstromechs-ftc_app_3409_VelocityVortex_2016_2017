@@ -105,9 +105,11 @@ public class MarsTeleopRD extends OpMode{
         }
 
         if(gamepad2.x){
-            robotBase.grabberServo.setPosition(0);
+            robotBase.grabberServo.setPower(1);
         } else if(gamepad2.y){
-            robotBase.grabberServo.setPosition(1);
+            robotBase.grabberServo.setPower(-1);
+        } else {
+            robotBase.grabberServo.setPower(0);
         }
     }
 }
