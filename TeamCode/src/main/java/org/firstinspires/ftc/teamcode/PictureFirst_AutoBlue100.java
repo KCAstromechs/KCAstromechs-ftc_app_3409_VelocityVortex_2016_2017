@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-@Autonomous(name="Blue Pos 1", group="Blue")
+@Autonomous(name="Blue Pos 1 Long Distance", group="Blue")
 public class PictureFirst_AutoBlue100 extends LinearOpMode {
 
     RobotBaseMarsRD robotBase;
