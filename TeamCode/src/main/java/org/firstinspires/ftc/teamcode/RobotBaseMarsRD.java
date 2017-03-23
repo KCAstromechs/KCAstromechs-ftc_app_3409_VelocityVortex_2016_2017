@@ -50,10 +50,11 @@ public class RobotBaseMarsRD implements SensorEventListener {
     static final double driveSpeed = 0.3;               // Default drive speed for better accuracy.
     static final double turnSpeed = 0.5;                // Default turn speed for better accuracy.
     static final double P_DRIVE_COEFF = 0.02;           // Larger is more responsive, but also less stable
-    static final double P_TURN_COEFF = 0.01;          // Larger is more responsive, but also less stable
+    static final double P_TURN_COEFF = 0.018;          // Larger is more responsive, but also less stable
     static final double D_TURN_COEFF = -0.03;           // Larger is more responsive, but also less stable
-    static final double k_MOTOR_STALL_SPEED = 0.25;     //Minimum speed at which robot can turn
+    static final double k_MOTOR_STALL_SPEED = 0.4;     //Minimum speed at which robot can turn
     static final double P_RAMP_COEFF = 0.00164;         //Propotional constant for driveStraight
+    public static final int adjustmentAngle = 19;           //Adjust the angle on everything by this
 
     //encoder ticks per one inch
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
@@ -212,10 +213,6 @@ public class RobotBaseMarsRD implements SensorEventListener {
         
         //moves servo to preset position
         reloaderServo.setPosition(RELOADER_CLOSED);
-        
-        //tells user initialization sequence is completed
-        callingOpMode.telemetry.addData(">", "Robot Ready.");    //
-        callingOpMode.telemetry.update();
     }
 
     /**
@@ -268,6 +265,8 @@ public class RobotBaseMarsRD implements SensorEventListener {
         double leftPower;                                       //Power being fed to left side of bot
         double rightPower;                                      //Power being fed to right side of bot
         double distanceFromInitial, errorFromEndpoint;          //Used to determine how much the bot should be de/accelerating
+
+        heading = (int) normalize360(heading);
 
         //Ensure that motors are set up correctly to drive
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -368,7 +367,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    public BeaconOrientation takeLongDistancePicture() throws InterruptedException {
+    public int takeLongDistancePicture() throws InterruptedException {
         int thisR, thisB, thisG;                    //RGB values of current pixel to translate into HSV
         int xRedAvg = 0;                            //Average X position of red pixels to help find red side location
         int xBlueAvg = 0;                           //Average X position of blue pixels to help find blue side location
@@ -377,7 +376,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
         int xRedSum = 0;                            //Added-up X pos of red pixels to find red side location
         int xBlueSum = 0;                           //Added-up X pos of blue pix to find blue side location
         int idx = 0;                                //Ensures we get correct image type from Vuforia
-        int beacon1 = 0;
+        int beacon = 0;
         float[] hsv = new float[3];                 //Array to hold Hue, Saturation, Value values for each pixel
         float thisH;                                //Hue value of current pixel to find its color
 
@@ -401,12 +400,13 @@ public class RobotBaseMarsRD implements SensorEventListener {
         //Loop through every pixel column
         int h = image.getHeight();
         int w = image.getWidth();
-        for (int i = 15; i < 150; i++) { //h
+        for (int i = 66; i < 133; i++) { //h
 
             //If the bot stops you should really stop.
             if(Thread.interrupted()) break;
 
             //Loop through a certain number of rows to cover a certain area of the image
+            //LOOP FOR SECOND BEACON
             for (int j = 650; j < 750; j++) { //925, 935 // w
 
                 //Take the RGB vals of current pix
@@ -424,10 +424,10 @@ public class RobotBaseMarsRD implements SensorEventListener {
                     thisH = hsv[0];
 
                     //We now have the colors (one byte each) for any pixel, (j, i) so we can add to the totals
-                    if (thisH <= 220 && thisH >= 180) {
+                    if (thisH <= 230 && thisH >= 170) {
                         totalBlue++;
                         xBlueSum += i;
-                    } else if (thisH <= 360 && thisH >= 330) {
+                    } else if (thisH <= 330 && thisH >= 280) {
                         totalRed++;
                         xRedSum += i;
                     }
@@ -435,18 +435,57 @@ public class RobotBaseMarsRD implements SensorEventListener {
             }
         }
 
+        boolean bSavePicture = false;
+        if (bSavePicture) {
+            // Reset the pixel pointer to the start of the image
+            px = image.getPixels();
+            // Create a buffer to hold 32-bit image dataa and fill it
+            int bmpData[] = new int[w * h];
+            int pixel;
+            int index = 0;
+            int x,y;
+            for (y = 0; y < h; y++) {
+                for (x = 0; x < w; x++) {
+                    thisR = px.get() & 0xFF;
+                    thisG = px.get() & 0xFF;
+                    thisB = px.get() & 0xFF;
+                    bmpData[index] = Color.rgb(thisR, thisG, thisB);
+                    index++;
+                }
+            }
+            // Now create a bitmap object from the buffer
+            Bitmap bmp = Bitmap.createBitmap(bmpData, w, h, Bitmap.Config.ARGB_8888);
+            // And save the bitmap to the file system
+            // NOTE:  AndroidManifest.xml needs <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+            try {
+                //to convert Date to String, use format method of SimpleDateFormat class.
+                DateFormat dateFormat = new SimpleDateFormat("mm-dd__hh-mm-ss");
+                String strDate = dateFormat.format(new Date());
+                String path = Environment.getExternalStorageDirectory() + "/Snapshot__" + strDate + ".png";
+                System.out.println("Snapshot filename" + path);
+                File file = new File(path);
+                file.createNewFile();
+                FileOutputStream fos = new FileOutputStream(file);
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                fos.flush();
+                fos.close();
+            } catch (Exception e) {
+                System.out.println("Snapshot exception" + e.getStackTrace().toString());
+            }
+        }
+
         //Find the averages
         xRedAvg = xRedSum / totalRed;
         xBlueAvg = xBlueSum / totalBlue;
 
-        if (totalBlue < 50 || totalRed < 50) {
-            beacon1 = 0;
+        if (totalBlue < 30 || totalRed < 30) {
+            beacon = 0;
         }
         else if (xRedAvg > xBlueAvg) {
-            beacon1 = BEACON_RED_BLUE;
+            beacon = BEACON_RED_BLUE;
         }
         else if (xBlueAvg > xRedAvg) {
-            beacon1 = BEACON_BLUE_RED;
+            beacon = BEACON_BLUE_RED;
         }
 
 
@@ -467,12 +506,14 @@ public class RobotBaseMarsRD implements SensorEventListener {
             System.out.println("SSS ");
         }
 
+        /*
         totalRed  = 1;
         totalBlue = 1;
         xRedSum   = 0;
         xBlueSum  = 0;
         xRedAvg   = 0;
         xBlueAvg  = 0;
+
 
         //LOOP FOR SECOND BEACON
         for (int i = 470; i < 550; i++) { //h
@@ -529,6 +570,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
             System.out.println("SSS ");
             System.out.println("SSS ");
         }
+
         if (totalBlue < 50 || totalRed < 50 || beacon1 == 0 || xRedAvg == xBlueAvg) {
             return BeaconOrientation.ORIENTATION_UNKNOWN;
         }
@@ -548,6 +590,8 @@ public class RobotBaseMarsRD implements SensorEventListener {
         }
 
         return BeaconOrientation.ORIENTATION_UNKNOWN;
+        */
+        return beacon;
     }
 
 
@@ -568,6 +612,8 @@ public class RobotBaseMarsRD implements SensorEventListener {
         float[] hsv = new float[3];                 //Array to hold Hue, Saturation, Value values for each pixel
         float thisH;                                //Hue value of current pixel to find its color
 
+        System.out.println("timestamp beginning takePicture");
+
         //If Vuforia has not yet started, we're screwed. Start it up now in the name of hope
         if(vuforia == null) initVuforia();
 
@@ -587,13 +633,17 @@ public class RobotBaseMarsRD implements SensorEventListener {
         //Loop through every pixel column
         int h = image.getHeight();
         int w = image.getWidth();
+
+
+        System.out.println("timestamp before processing loop");
+
         for (int i = 0; i < h; i++) {
 
             //If the bot stops you should really stop.
             if(Thread.interrupted()) break;
 
             //Loop through a certain number of rows to cover a certain area of the image
-            for (int j = 0; j < w; j++) { //925, 935
+            for (int j = 610; j < 800; j++) { //925, 935
 
                 //Take the RGB vals of current pix
                 thisR = px.get(i * w * 3 + (j * 3)) & 0xFF;
@@ -621,6 +671,50 @@ public class RobotBaseMarsRD implements SensorEventListener {
             }
         }
 
+        System.out.println("timestamp after processing loop, before save pic");
+
+        boolean bSavePicture = false;
+        if (bSavePicture) {
+            // Reset the pixel pointer to the start of the image
+            px = image.getPixels();
+            // Create a buffer to hold 32-bit image dataa and fill it
+            int bmpData[] = new int[w * h];
+            int pixel;
+            int index = 0;
+            int x,y;
+            for (y = 0; y < h; y++) {
+                for (x = 0; x < w; x++) {
+                    thisR = px.get() & 0xFF;
+                    thisG = px.get() & 0xFF;
+                    thisB = px.get() & 0xFF;
+                    bmpData[index] = Color.rgb(thisR, thisG, thisB);
+                    index++;
+                }
+            }
+            // Now create a bitmap object from the buffer
+            Bitmap bmp = Bitmap.createBitmap(bmpData, w, h, Bitmap.Config.ARGB_8888);
+            // And save the bitmap to the file system
+            // NOTE:  AndroidManifest.xml needs <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+            try {
+                //to convert Date to String, use format method of SimpleDateFormat class.
+                DateFormat dateFormat = new SimpleDateFormat("mm-dd__hh-mm-ss");
+                String strDate = dateFormat.format(new Date());
+                String path = Environment.getExternalStorageDirectory() + "/Snapshot__" + strDate + ".png";
+                System.out.println("Snapshot filename" + path);
+                File file = new File(path);
+                file.createNewFile();
+                FileOutputStream fos = new FileOutputStream(file);
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                fos.flush();
+                fos.close();
+            } catch (Exception e) {
+                System.out.println("Snapshot exception" + e.getStackTrace().toString());
+            }
+        }
+
+        System.out.println("timestamp after save pic");
+
+
         //Find the averages
         xRedAvg = xRedSum / totalRed;
         xBlueAvg = xBlueSum / totalBlue;
@@ -639,6 +733,8 @@ public class RobotBaseMarsRD implements SensorEventListener {
             System.out.println("xRedAvg=" + xRedAvg);
             System.out.println("xBlueAvg=" + xBlueAvg);
         }
+
+        System.out.println("timestamp exit takePicture");
 
         //If the number of pixels for either color is too low, return a null value
         if (totalBlue < 50 || totalRed < 50) {
@@ -873,7 +969,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
      * @return whether the shooter is doing stuff to make Auto compatible with loops
      */
     public boolean shooterHandler(boolean shotRequested, boolean manualRequested){
-
+        System.out.println("in Shooter");
         //case 0 - shoot isn't busy and nothing is requested
         if ((!shooterIsBusy && !manualRequested && !shotRequested) || callingOpMode.getRuntime() < timeToFinishReload){
             motorShooter.setPower(0);                                       //Confirm stuff is off, we're doing nothing
@@ -964,6 +1060,9 @@ public class RobotBaseMarsRD implements SensorEventListener {
         double power = 0.5;                                                 //
         long initialTime;                                                   //
         timeOutSec *= 1000;                                                 //converts to millis
+
+        System.out.println("inHeading for pushButton: " + heading);
+        System.out.println("outHeading for pushButton: " + outHeading);
 
         //Reset encoders in case that hadn't been done
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -1062,6 +1161,13 @@ public class RobotBaseMarsRD implements SensorEventListener {
         //Normalize zRotation to be used
         zRotation = normalize360(rawGyro - zero);
 //        Dbg("zRotation in callback: " , zRotation, false);
+    }
+
+    public void adjustZero(double adjustment) {
+        System.out.println("SSS zero prior to adjustment " + zero);
+        zero -= adjustment;
+        System.out.println("SSS zero after adjustment " + zero);
+
     }
 
     /**

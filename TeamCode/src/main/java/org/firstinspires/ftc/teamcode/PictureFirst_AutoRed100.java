@@ -1,7 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.firstinspires.ftc.robotcore.internal.AppUtil;
 
 @Autonomous(name="Red Pos 1 Long Distance", group="Red")
 public class PictureFirst_AutoRed100 extends LinearOpMode {
@@ -9,9 +15,13 @@ public class PictureFirst_AutoRed100 extends LinearOpMode {
     RobotBaseMarsRD robotBase;
     boolean debug = true;
 
+    protected RelativeLayout squaresOverlay = null;
+    protected AppUtil appUtil = AppUtil.getInstance();
+
+
     @Override
     public void runOpMode() throws InterruptedException {
-        robotBase = new RobotBaseMarsRD();
+    /*    robotBase = new RobotBaseMarsRD();
         robotBase.init(hardwareMap, this);
         robotBase.initVuforia();
         robotBase.setDebug(debug);
@@ -20,6 +30,19 @@ public class PictureFirst_AutoRed100 extends LinearOpMode {
         double shiftedAvg;
         double deltaX;
         double correctionAngle;
+
+        //Sets up our beacon lineup "layout"
+        appUtil.synchronousRunOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                squaresOverlay = (RelativeLayout) View.inflate(appUtil.getActivity(), R.layout.beacon_line_up_squares, null);
+                squaresOverlay.findViewById(R.id.firstBeacon).setVisibility(View.VISIBLE);
+                squaresOverlay.findViewById(R.id.secondBeacon).setVisibility(View.VISIBLE);
+                squaresOverlay.findViewById(R.id.Origin).setVisibility(View.VISIBLE);
+                appUtil.getActivity().addContentView(squaresOverlay, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+        });
+
 
         while(!robotBase.isCocked()){
             robotBase.shooterHandler(false, true);
@@ -36,6 +59,18 @@ public class PictureFirst_AutoRed100 extends LinearOpMode {
 
         if (debug)
             System.out.println("SSS reloaderPos @Start: " + robotBase.reloaderServo.getPosition());
+
+        //Terminates "layout" for beacon lineup
+        appUtil.synchronousRunOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (squaresOverlay != null){
+                    ((ViewGroup)squaresOverlay.getParent()).removeView(squaresOverlay);
+                }
+                squaresOverlay = null;
+            }
+        });
+
 
         picData = robotBase.takeLongDistancePicture();
 
@@ -213,6 +248,7 @@ public class PictureFirst_AutoRed100 extends LinearOpMode {
         //clean up the mess we made
         robotBase.deconstruct();
         robotBase = null;
-
+    */
     }
+
 }

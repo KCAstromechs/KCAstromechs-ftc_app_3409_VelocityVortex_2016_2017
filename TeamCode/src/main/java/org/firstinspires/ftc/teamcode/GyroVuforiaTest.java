@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.TimeoutException;
  * Created by N2Class1 on 3/20/2017.
  */
 
+@Autonomous(name="Angle tester", group="Test")
 public class GyroVuforiaTest extends LinearOpMode{
 
     protected AppUtil appUtil = AppUtil.getInstance();
@@ -35,7 +36,7 @@ public class GyroVuforiaTest extends LinearOpMode{
             @Override
             public void run() {
                 squaresOverlay = (RelativeLayout) View.inflate(appUtil.getActivity(), R.layout.beacon_line_up_squares, null);
-                squaresOverlay.findViewById(R.id.firstBeacon).setVisibility(View.VISIBLE);
+//              squaresOverlay.findViewById(R.id.firstBeacon).setVisibility(View.VISIBLE);
                 squaresOverlay.findViewById(R.id.secondBeacon).setVisibility(View.VISIBLE);
                 squaresOverlay.findViewById(R.id.Origin).setVisibility(View.VISIBLE);
                 appUtil.getActivity().addContentView(squaresOverlay, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -45,6 +46,7 @@ public class GyroVuforiaTest extends LinearOpMode{
 
         while(!Thread.interrupted()) {
             telemetry.addData("Gyro value:", robotBase.getZRotation());
+            telemetry.update();
         }
 
 
