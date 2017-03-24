@@ -26,12 +26,13 @@ public class AutoImageProccessTest extends LinearOpMode {
 
         robotBase = new RobotBaseMarsRD();
         robotBase.initVuforia();
+        robotBase.setDebug(true);
 
         appUtil.synchronousRunOnUiThread(new Runnable() {
             @Override
             public void run() {
                 squaresOverlay = (RelativeLayout) View.inflate(appUtil.getActivity(), R.layout.beacon_line_up_squares, null);
-                squaresOverlay.findViewById(R.id.firstBeacon).setVisibility(View.VISIBLE);
+//              squaresOverlay.findViewById(R.id.firstBeacon).setVisibility(View.VISIBLE);
                 squaresOverlay.findViewById(R.id.secondBeacon).setVisibility(View.VISIBLE);
                 squaresOverlay.findViewById(R.id.Origin).setVisibility(View.VISIBLE);
                 appUtil.getActivity().addContentView(squaresOverlay, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -39,8 +40,6 @@ public class AutoImageProccessTest extends LinearOpMode {
         });
 
         waitForStart();
-
-        robotBase.setDebug(true);
 
         appUtil.synchronousRunOnUiThread(new Runnable() {
             @Override
@@ -52,16 +51,16 @@ public class AutoImageProccessTest extends LinearOpMode {
             }
         });
 
-        BeaconOrientation pos = robotBase.takeLongDistancePicture();
+        int pos = robotBase.takeLongDistancePicture();
 
-        System.out.println("SSS " + pos.toString());
+        //System.out.println("SSS " + pos.toString());
 
-        /*if (pos == RobotBasePolaris.BEACON_RED_BLUE) {
+        if (pos == RobotBasePolaris.BEACON_RED_BLUE) {
             System.out.println("TTT BEACON_RED_BLUE");
         } else if (pos == RobotBasePolaris.BEACON_BLUE_RED) {
             System.out.println("TTT BEACON_BLUE_RED");
         } else {
             System.out.println("TTT SAMUEL");
-        } */
+        }
     }
 }
