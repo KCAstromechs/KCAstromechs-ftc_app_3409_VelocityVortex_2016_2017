@@ -52,7 +52,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
     static final double P_DRIVE_COEFF = 0.02;           // Larger is more responsive, but also less stable
     static final double P_TURN_COEFF = 0.018;          // Larger is more responsive, but also less stable
     static final double D_TURN_COEFF = -0.03;           // Larger is more responsive, but also less stable
-    static final double k_MOTOR_STALL_SPEED = 0.4;     //Minimum speed at which robot can turn
+    static final double k_MOTOR_STALL_SPEED = 0.5;     //Minimum speed at which robot can turn
     static final double P_RAMP_COEFF = 0.00164;         //Propotional constant for driveStraight
     public static final int adjustmentAngle = 19;           //Adjust the angle on everything by this
 
@@ -367,6 +367,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+
     public int takeLongDistancePicture() throws InterruptedException {
         int thisR, thisB, thisG;                    //RGB values of current pixel to translate into HSV
         int xRedAvg = 0;                            //Average X position of red pixels to help find red side location

@@ -213,9 +213,9 @@ public class PictureFirst_AutoBlue100 extends LinearOpMode {
         }
         //If they match and say blue is on the right, go for the right
         else if ((pos == RobotBaseMarsRD.BEACON_RED_BLUE || pos == 0) && (beacon2 == RobotBaseMarsRD.BEACON_RED_BLUE)){
-            if(opModeIsActive()) robotBase.turn(105 - RobotBaseMarsRD.adjustmentAngle +(float)correctionAngle);
+            if(opModeIsActive()) robotBase.turn(100 - RobotBaseMarsRD.adjustmentAngle +(float)correctionAngle);
             try {
-                if(opModeIsActive()) robotBase.pushButton(105 - RobotBaseMarsRD.adjustmentAngle + (int)correctionAngle, 100 - RobotBaseMarsRD.adjustmentAngle, 2);
+                if(opModeIsActive()) robotBase.pushButton(100 - RobotBaseMarsRD.adjustmentAngle + (int)correctionAngle, 100 - RobotBaseMarsRD.adjustmentAngle, 2);
             }
             catch (TimeoutException e) {
                 if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 100 - RobotBaseMarsRD.adjustmentAngle);
@@ -225,9 +225,9 @@ public class PictureFirst_AutoBlue100 extends LinearOpMode {
         else {
             //If it says blue is on the right, we go right
             if (pos == RobotBasePolaris.BEACON_RED_BLUE) {
-                if (opModeIsActive()) robotBase.turn(105 - RobotBaseMarsRD.adjustmentAngle + (float) correctionAngle);
+                if (opModeIsActive()) robotBase.turn(100 - RobotBaseMarsRD.adjustmentAngle + (float) correctionAngle);
                 try {
-                    if (opModeIsActive()) robotBase.pushButton(105 - RobotBaseMarsRD.adjustmentAngle + (int) correctionAngle, 100 - RobotBaseMarsRD.adjustmentAngle, 2);
+                    if (opModeIsActive()) robotBase.pushButton(100 - RobotBaseMarsRD.adjustmentAngle + (int) correctionAngle, 100 - RobotBaseMarsRD.adjustmentAngle, 2);
                 } catch (TimeoutException e) {
                     if (opModeIsActive()) robotBase.driveStraight(-20, -0.5, 100 - RobotBaseMarsRD.adjustmentAngle);
                 }
