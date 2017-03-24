@@ -114,7 +114,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
     
     //sets positions for ball indexer (servo)
     static final double RELOADER_CLOSED = 0.32;
-    static final double RELOADER_OPEN = 0.6;
+    static final double RELOADER_OPEN = 1;
     
     //more required vars for gyro operation
     private SensorManager mSensorManager;
