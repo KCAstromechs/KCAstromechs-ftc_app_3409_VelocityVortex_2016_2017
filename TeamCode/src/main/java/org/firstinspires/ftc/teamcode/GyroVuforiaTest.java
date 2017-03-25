@@ -37,7 +37,7 @@ public class GyroVuforiaTest extends LinearOpMode{
             public void run() {
                 squaresOverlay = (RelativeLayout) View.inflate(appUtil.getActivity(), R.layout.beacon_line_up_squares, null);
 //              squaresOverlay.findViewById(R.id.firstBeacon).setVisibility(View.VISIBLE);
-                squaresOverlay.findViewById(R.id.secondBeacon).setVisibility(View.VISIBLE);
+                squaresOverlay.findViewById(R.id.redSideBeacon).setVisibility(View.VISIBLE);
                 squaresOverlay.findViewById(R.id.Origin).setVisibility(View.VISIBLE);
                 appUtil.getActivity().addContentView(squaresOverlay, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             }

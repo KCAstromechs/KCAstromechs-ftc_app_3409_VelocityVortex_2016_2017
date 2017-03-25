@@ -3,7 +3,7 @@
     android:id="@+id/beacon_line_up_squares"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
-    <View android:id="@+id/secondBeacon"
+    <View android:id="@+id/blueSideBeacon"
         android:background="@drawable/green_square"
         android:layout_marginTop="1150px"
         android:layout_marginLeft="767px"
@@ -11,18 +11,16 @@
         android:layout_height="100px"
         android:visibility="invisible"
         />
-    <!--
 
-    <View android:id="@+id/secondBeacon"
+    <View android:id="@+id/redSideBeacon"
         android:background="@drawable/green_square"
-        android:layout_marginTop="1190px"
-        android:layout_marginLeft="350px"
-        android:layout_width="80px"
-        android:layout_height="87px"
+        android:layout_marginTop="1150px"
+        android:layout_marginLeft="313px"
+        android:layout_width="67px"
+        android:layout_height="100px"
         android:visibility="invisible"
         />
 
-    -->
     <View android:id="@+id/Origin"
         android:background="@drawable/green_square"
         android:layout_marginTop="500px"

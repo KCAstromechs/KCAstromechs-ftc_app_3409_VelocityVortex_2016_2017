@@ -52,9 +52,9 @@ public class RobotBaseMarsRD implements SensorEventListener {
     static final double P_DRIVE_COEFF = 0.02;           // Larger is more responsive, but also less stable
     static final double P_TURN_COEFF = 0.018;          // Larger is more responsive, but also less stable
     static final double D_TURN_COEFF = -0.03;           // Larger is more responsive, but also less stable
+    static final double TURN_MINIMUM_SPEED = 0.4;       //Minimum speed turn can drive at during PID control
     static final double k_MOTOR_STALL_SPEED = 0.5;     //Minimum speed at which robot can turn
     static final double P_RAMP_COEFF = 0.00164;         //Propotional constant for driveStraight
-    public static final int adjustmentAngle = 19;           //Adjust the angle on everything by this
 
     //encoder ticks per one inch
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
@@ -368,7 +368,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public int takeLongDistancePicture() throws InterruptedException {
+    public int takeLongDistancePicture(int startXpx, int startYpx) throws InterruptedException {
         int thisR, thisB, thisG;                    //RGB values of current pixel to translate into HSV
         int xRedAvg = 0;                            //Average X position of red pixels to help find red side location
         int xBlueAvg = 0;                           //Average X position of blue pixels to help find blue side location
@@ -401,14 +401,14 @@ public class RobotBaseMarsRD implements SensorEventListener {
         //Loop through every pixel column
         int h = image.getHeight();
         int w = image.getWidth();
-        for (int i = 66; i < 133; i++) { //h
+        for (int i = startXpx; i < startXpx + 67; i++) { //h
 
             //If the bot stops you should really stop.
             if(Thread.interrupted()) break;
 
             //Loop through a certain number of rows to cover a certain area of the image
             //LOOP FOR SECOND BEACON
-            for (int j = 650; j < 750; j++) { //925, 935 // w
+            for (int j = startYpx; j < startYpx + 100; j++) { //925, 935 // w
 
                 //Take the RGB vals of current pix
                 thisR = px.get(i * w * 3 + (j * 3)) & 0xFF;
@@ -493,7 +493,8 @@ public class RobotBaseMarsRD implements SensorEventListener {
 
         if(debug)
         {
-            System.out.println("SSS FIRST BEACON DATA:");
+            System.out.println();
+            System.out.println("SSS LONG DISTANCE DATA:");
             System.out.println("SSS width=" + image.getWidth());
             System.out.println("SSS height=" + image.getHeight());
             System.out.println("SSS totalRed=" + totalRed);
@@ -661,10 +662,10 @@ public class RobotBaseMarsRD implements SensorEventListener {
                     thisH = hsv[0];
 
                     //We now have the colors (one byte each) for any pixel, (j, i) so we can add to the totals
-                    if (thisH <= 220 && thisH >= 180) {
+                    if (thisH <= 230 && thisH >= 170) {
                         totalBlue++;
                         xBlueSum += i;
-                    } else if (thisH <= 360 && thisH >= 330) {
+                    } else if (thisH <= 330 && thisH >= 280) {
                         totalRed++;
                         xRedSum += i;
                     }
@@ -721,18 +722,18 @@ public class RobotBaseMarsRD implements SensorEventListener {
         xBlueAvg = xBlueSum / totalBlue;
         lastPicBeaconAvg = (xBlueAvg + xRedAvg) / 2.0;
 
-
         if(debug)
         {
-            System.out.println("");
-            System.out.println("width=" + image.getWidth());
-            System.out.println("height=" + image.getHeight());
-            System.out.println("totalRed=" + totalRed);
-            System.out.println("totalBlue=" + totalBlue);
-            System.out.println("xRedSum=" + xRedSum);
-            System.out.println("xBlueSum=" + xBlueSum);
-            System.out.println("xRedAvg=" + xRedAvg);
-            System.out.println("xBlueAvg=" + xBlueAvg);
+            System.out.println();
+            System.out.println("SSS CLOSE UP DATA");
+            System.out.println("SSS width=" + image.getWidth());
+            System.out.println("SSS height=" + image.getHeight());
+            System.out.println("SSS totalRed=" + totalRed);
+            System.out.println("SSS totalBlue=" + totalBlue);
+            System.out.println("SSS xRedSum=" + xRedSum);
+            System.out.println("SSS xBlueSum=" + xBlueSum);
+            System.out.println("SSS xRedAvg=" + xRedAvg);
+            System.out.println("SSS xBlueAvg=" + xBlueAvg);
         }
 
         System.out.println("timestamp exit takePicture");
@@ -815,8 +816,8 @@ public class RobotBaseMarsRD implements SensorEventListener {
                 //If necessary, pare down motorspeed, or bring it up to stall speed
                 if(motorSpeed>power){
                     motorSpeed=power;
-                } else if(motorSpeed<k_MOTOR_STALL_SPEED){
-                    motorSpeed=k_MOTOR_STALL_SPEED;
+                } else if(motorSpeed < TURN_MINIMUM_SPEED){
+                    motorSpeed = TURN_MINIMUM_SPEED;
                 }
 
                 //Set motor powers equal to motorSpeed
@@ -854,8 +855,8 @@ public class RobotBaseMarsRD implements SensorEventListener {
                 //If necessary, pare down motorSpeed or bring it up to stall speed
                 if(motorSpeed>power){
                     motorSpeed=power;
-                }else if(motorSpeed<k_MOTOR_STALL_SPEED){
-                    motorSpeed=k_MOTOR_STALL_SPEED;
+                }else if(motorSpeed < TURN_MINIMUM_SPEED){
+                    motorSpeed = TURN_MINIMUM_SPEED;
                 }
 
                 //Set motor powers equal to motorSpeed
@@ -891,8 +892,8 @@ public class RobotBaseMarsRD implements SensorEventListener {
         //If we want a reload, the reset time is 'null', and we're not resetting the reload
         if(reloadRequested && reloadResetTime == -1 && !isReloadResetting) {
             reloaderServo.setPosition(RELOADER_OPEN);                       //Open the reloader for a ball
-            reloadResetTime = callingOpMode.getRuntime() + 0.4;             //Put reload reset time to current time + 0.4 for timing
-            timeToFinishReload = callingOpMode.getRuntime() + 0.8;          //Change the time to finish reload for timing
+            reloadResetTime = callingOpMode.getRuntime() + 0.6;             //Put reload reset time to current time + 0.4 for timing
+            timeToFinishReload = callingOpMode.getRuntime() + 1.2;          //Change the time to finish reload for timing
             return true;                                                    //Tell loop we're doing stuff
         }
         //Elseif we've been running for more time than it takes to reload and the reset time isn't 'null'
