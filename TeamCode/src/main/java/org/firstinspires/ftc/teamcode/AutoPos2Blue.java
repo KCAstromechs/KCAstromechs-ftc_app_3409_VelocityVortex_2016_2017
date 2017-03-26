@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  */
 
 
-@Autonomous(name="Auto Pos 2", group="Autonomous")
-public class AutoPos2 extends LinearOpMode{
+@Autonomous(name="Blue Pos 2", group="Blue")
+public class AutoPos2Blue extends LinearOpMode{
 
     RobotBaseMarsRD robotBase;
 

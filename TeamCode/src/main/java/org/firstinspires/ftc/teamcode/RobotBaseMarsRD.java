@@ -1259,4 +1259,7 @@ public class RobotBaseMarsRD implements SensorEventListener {
      * @param _reload
      */
     public void setReloadAfterShot (boolean _reload) { reloadAfterShot = _reload; }
+
+
+
 }
