@@ -156,6 +156,13 @@ public class NovaAutoRed100 extends LinearOpMode {
         while (opModeIsActive() && robotBase.reloadHandler(true));
         while (opModeIsActive() && robotBase.shooterHandler(true, false));
 
+        if (getCurrentAutoType() == AutoType.OpMode65Ramp) {
+
+            if (opModeIsActive()) robotBase.turn(200);
+            if (opModeIsActive()) robotBase.driveStraight(60, 200);
+
+        }
+
         if (getCurrentAutoType() != AutoType.OpMode60) {
 
             //Turn to drive to the center beacon
@@ -197,8 +204,6 @@ public class NovaAutoRed100 extends LinearOpMode {
                 if (debug)
                     System.out.println("SSS Failsafe drive");
             }
-
-            //distance from BLUE_RED endpoint to line = 40 inches
 
             //waits for robot to come to rest, then takes picture to determine beacon orientation
             if (opModeIsActive()) sleep(500);
@@ -295,6 +300,13 @@ public class NovaAutoRed100 extends LinearOpMode {
                 }
             }
 
+            if (getCurrentAutoType() == AutoType.OpMode95Ramp) {
+
+                if (opModeIsActive()) robotBase.turn(180);
+                if (opModeIsActive()) robotBase.driveStraight(70, 180);
+
+            }
+
             if (getCurrentAutoType() == AutoType.OpMode100) {
                 //Turn to go hit cap ball
                 if (opModeIsActive()) robotBase.turn(142 - adjustmentAngle);
@@ -317,6 +329,8 @@ public class NovaAutoRed100 extends LinearOpMode {
 
     //Declares options for OpModes for Blue side
     protected enum AutoType {
+        OpMode65Ramp,
+        OpMode95Ramp,
         OpMode100,
         OpMode90,
         OpMode60;

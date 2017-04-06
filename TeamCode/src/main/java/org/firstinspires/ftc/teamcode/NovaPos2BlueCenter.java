@@ -8,53 +8,41 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  */
 
 
-@Autonomous(name="Blue Pos 2", group="Blue")
-public class AutoPos2Blue extends LinearOpMode{
+@Autonomous(name="Blue Pos 2 + ball", group="Blue")
+public class NovaPos2BlueCenter extends LinearOpMode{
 
     RobotBaseMarsRD robotBase;
-
-    //determines whether we want to dump data
     boolean debug = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        //gives us instance of robot base
         robotBase = new RobotBaseMarsRD();
-
-        //sets up robot variables, moves servos to starting positions, and gives robotbase this instance of OpMode
         robotBase.init(hardwareMap, this);
-
-        //tells robot base whether we want to dump data
         robotBase.setDebug(debug);
 
-        //while touch sensor isn't pressed, manually drive shooter
         while (!robotBase.isCocked()) {
             robotBase.shooterHandler(false, true);
         }
-        //dump that we finished cocking if we want to dump data
+
         if (debug)
             System.out.println("SSS left isCocked");
 
-        //stops shooter after we are finished cocking
         robotBase.shooterHandler(false, false);
 
         waitForStart();
 
-        //dumps reloader position if we want to dump data
         if (debug)
             System.out.println("SSS reloaderPos @Start: " + robotBase.reloaderServo.getPosition());
 
-        //NOTE: if we are about to execute a method that may take some time,
-        // then we make sure we are still active by calling opModeIsActive()
+        //initial drive
 
-        //drives forward to an optimal position to take a shot
         if (opModeIsActive()) robotBase.driveStraight(25, 0);
 
-        //takes two shots
         while (opModeIsActive() && robotBase.shooterHandler(true, false)) ;
         while (opModeIsActive() && robotBase.reloadHandler(true)) ;
         while (opModeIsActive() && robotBase.shooterHandler(true, false)) ;
 
-
+        if (opModeIsActive()) sleep(20000);
+        if (opModeIsActive()) robotBase.driveStraight(25, 0);
     }
 }

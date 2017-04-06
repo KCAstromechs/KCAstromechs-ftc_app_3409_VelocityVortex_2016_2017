@@ -885,15 +885,21 @@ public class RobotBaseMarsRD implements SensorEventListener {
      * @return to make Auto usable, put it in a loop, return true only while reloading
      */
     public boolean reloadHandler(boolean reloadRequested) {
-        //If the time is more than the time it takes to reloac
+        //If the time is more than the time it takes to reload
         if(callingOpMode.getRuntime() > timeToFinishReload) {
             reloadJustFinished = true;                                      //we know we just finished a reload
+            if (teleOpDebug) {
+                System.out.println("SSS finished reload");
+            }
         }
         //If we want a reload, the reset time is 'null', and we're not resetting the reload
         if(reloadRequested && reloadResetTime == -1 && !isReloadResetting) {
             reloaderServo.setPosition(RELOADER_OPEN);                       //Open the reloader for a ball
             reloadResetTime = callingOpMode.getRuntime() + 0.6;             //Put reload reset time to current time + 0.4 for timing
             timeToFinishReload = callingOpMode.getRuntime() + 1.2;          //Change the time to finish reload for timing
+            if (teleOpDebug) {
+                System.out.println("SSS beginning reload");
+            }
             return true;                                                    //Tell loop we're doing stuff
         }
         //Elseif we've been running for more time than it takes to reload and the reset time isn't 'null'
@@ -901,10 +907,16 @@ public class RobotBaseMarsRD implements SensorEventListener {
             reloaderServo.setPosition(RELOADER_CLOSED);                     //Close the reloader to stop balls
             reloadResetTime = -1;                                           //Put the reset time back to 'null'
             isReloadResetting = true;                                       //tell the handler we are resetting the reloader now
+            if (teleOpDebug) {
+                System.out.println("SSS closing reload");
+            }
             return true;                                                    //Tell loop we're doing stuff
         }
         //Elseif we've not been running long enough to get stuff done
         else if(callingOpMode.getRuntime() < timeToFinishReload) {
+            if (teleOpDebug) {
+                System.out.println("SSS still in reload");
+            }
             return true;                                                    //Tell loop we're still working on doing stuff
         }
         //If none of the above are true, we aren't doing anything. Tell handler and loop so.
@@ -970,11 +982,19 @@ public class RobotBaseMarsRD implements SensorEventListener {
      * @param manualRequested Only manually runs shoot motor if requested to make Tele compatible
      * @return whether the shooter is doing stuff to make Auto compatible with loops
      */
+    static boolean teleOpDebug = false;
+    static int loopCounter = 0;
     public boolean shooterHandler(boolean shotRequested, boolean manualRequested){
-        System.out.println("in Shooter");
+        if (teleOpDebug) {
+            System.out.println("SSS in Shooter");
+        }
         //case 0 - shoot isn't busy and nothing is requested
         if ((!shooterIsBusy && !manualRequested && !shotRequested) || callingOpMode.getRuntime() < timeToFinishReload){
             motorShooter.setPower(0);                                       //Confirm stuff is off, we're doing nothing
+            shooterIsBusy = false;
+            if(teleOpDebug) {
+                System.out.println("SSS case 0");
+            }
             return false;
         }
 
@@ -982,6 +1002,9 @@ public class RobotBaseMarsRD implements SensorEventListener {
         else if (manualRequested){
             motorShooter.setPower(0.7);                                     //Turn on power, return we're doing nothing (no subroutines)
             shooterIsBusy = false;
+            if (teleOpDebug) {
+                System.out.println("SSS case 1");
+            }
             return false;
         }
 
@@ -990,17 +1013,26 @@ public class RobotBaseMarsRD implements SensorEventListener {
             motorShooter.setPower(0.7);                                     //Turn on power
             shooterIsBusy = true;                                           //We're finally doing something
             touchToggle = false;                                            //Touch sensor hasn't been released
+            if (teleOpDebug) {
+                System.out.println("SSS case 2");
+            }
             return true;                                                    //we're in a subroutine
         }
 
         // case 3 - shoot is busy and touch sensor not yet released (active)
         else if (shooterIsBusy && touchShooter.isPressed() && !touchToggle){
+            if (teleOpDebug) {
+                System.out.println("SSS case 3");
+            }
             return true;                                                    //We're in a subroutine. Will keep motors on
         }
 
         // case 4 - shoot is still busy and touch sensor is released (not active)
         else if (shooterIsBusy && !touchShooter.isPressed()){
             touchToggle = true;                                             //Touch sensor has been released
+            if (teleOpDebug) {
+                System.out.println("SSS case 4");
+            }
             return true;                                                    //We're in a subroutine still
         }
 
@@ -1009,6 +1041,9 @@ public class RobotBaseMarsRD implements SensorEventListener {
             shooterIsBusy = false;                                          //We're not doing anything anymore
             motorShooter.setPower(0);                                       //Stop trying to move
             if (reloadAfterShot) reloadHandler(true);                       //If we want to reload, run the reloader
+            if (teleOpDebug) {
+                System.out.println("SSS case 5");
+            }
             return false;                                                   //The subroutine is over
         }
         return false;                                                       //If none of above (never), we're doing nothing

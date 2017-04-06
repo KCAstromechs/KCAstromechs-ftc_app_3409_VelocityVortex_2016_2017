@@ -90,9 +90,6 @@ public class NovaAutoBlue100 extends LinearOpMode {
                 System.out.println("second beacon: " + beacon2);
         }
 
-        //BLUE_RED == 2
-        //RED_BLUE == 1
-
         //initial drive out to first beacon
         if(opModeIsActive()) robotBase.driveStraight(48, 19 - adjustmentAngle);
 
@@ -155,7 +152,14 @@ public class NovaAutoBlue100 extends LinearOpMode {
         while (opModeIsActive() && robotBase.reloadHandler(true));
         while (opModeIsActive() && robotBase.shooterHandler(true, false));
 
-        if(getCurrentAutoType() != AutoType.OpMode60) {
+        if (getCurrentAutoType() == AutoType.OpMode65Ramp) {
+
+            if (opModeIsActive()) robotBase.turn(155);
+            if (opModeIsActive()) robotBase.driveStraight(60, 155);
+
+        }
+
+        if(getCurrentAutoType() != AutoType.OpMode60 || getCurrentAutoType() != AutoType.OpMode65Ramp) {
 
             //Turn to drive to the second beacon
             if (opModeIsActive()) robotBase.turn(0 - adjustmentAngle);
@@ -282,6 +286,11 @@ public class NovaAutoBlue100 extends LinearOpMode {
                 }
             }
 
+            if (getCurrentAutoType() == AutoType.OpMode95Ramp) {
+                if (opModeIsActive()) robotBase.turn(180);
+                if (opModeIsActive()) robotBase.driveStraight(70, 180);
+            }
+
             if (getCurrentAutoType() == AutoType.OpMode100) {
                 //Turn to go hit cap ball
                 if (opModeIsActive()) robotBase.turn(218 - adjustmentAngle);
@@ -303,6 +312,8 @@ public class NovaAutoBlue100 extends LinearOpMode {
 
     //Declares options for OpModes for Blue side
     protected enum AutoType {
+        OpMode65Ramp,
+        OpMode95Ramp,
         OpMode100,
         OpMode90,
         OpMode60;
