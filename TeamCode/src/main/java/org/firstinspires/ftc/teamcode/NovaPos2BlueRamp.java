@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  */
 
 
-@Autonomous(name="Blue Pos 2", group="Blue")
+@Autonomous(name="Blue Pos 2 Ramp", group="Blue")
 public class NovaPos2BlueRamp extends LinearOpMode{
 
     RobotBaseMarsRD robotBase;
@@ -56,7 +56,7 @@ public class NovaPos2BlueRamp extends LinearOpMode{
         while (opModeIsActive() && robotBase.shooterHandler(true, false)) ;
 
         if (opModeIsActive()) robotBase.turn(60);
-        if (opModeIsActive()) robotBase.driveStraight(48, 60);
+        if (opModeIsActive()) robotBase.driveStraight(53, 60);
 
     }
 }

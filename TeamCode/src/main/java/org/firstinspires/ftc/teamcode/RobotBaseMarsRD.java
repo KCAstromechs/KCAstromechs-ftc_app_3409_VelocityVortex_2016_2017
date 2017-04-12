@@ -244,6 +244,46 @@ public class RobotBaseMarsRD implements SensorEventListener {
         motorSpinner.setPower(0);
     }
 
+    public void beeline(double inches) {
+        int target = (int) (inches * COUNTS_PER_INCH);          //translates the number of inches to be driven into encoder ticks
+        double power = 1;
+
+        //Ensure that motors are set up correctly to drive
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        //Find initial number of ticks on encoder when beginning drive
+        double encoderInitialPos = encoderMotor.getCurrentPosition();
+        callingOpMode.telemetry.addData("Initial position", encoderInitialPos);
+
+        //While: we have not driven correct distance & bot is not stopped
+        while (Math.abs(encoderMotor.getCurrentPosition()) < Math.abs(target) && !Thread.interrupted()) {
+            //Put the power on and hit pause for a second
+            updateDriveMotors(power, power, false);
+            Thread.yield();
+        }
+
+        //When the drive is finished, it is time to turn off the drive motors
+        updateDriveMotors(0, 0, false);
+
+        //Reset the motors for future use, just in case
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+    }
+
     /**
      * Method overloading to use default power for driveStraight
      */

@@ -109,6 +109,7 @@ public class NovaAutoBlue100 extends LinearOpMode {
         deltaX = (340 - shiftedAvg)/robotBase.PIXELS_PER_INCH;
         correctionAngle = Math.toDegrees(Math.atan(deltaX/30.));
 
+
         //outputs beacon info for testing purposes
         if (debug) {
             System.out.println("px per degree: " + robotBase.PIXELS_PER_DEGREE);
@@ -154,12 +155,12 @@ public class NovaAutoBlue100 extends LinearOpMode {
 
         if (getCurrentAutoType() == AutoType.OpMode65Ramp) {
 
-            if (opModeIsActive()) robotBase.turn(155);
-            if (opModeIsActive()) robotBase.driveStraight(60, 155);
+            if (opModeIsActive()) robotBase.turn(155 - adjustmentAngle);
+            if (opModeIsActive()) robotBase.beeline(52);
 
         }
 
-        if(getCurrentAutoType() != AutoType.OpMode60 || getCurrentAutoType() != AutoType.OpMode65Ramp) {
+        if(getCurrentAutoType() != AutoType.OpMode60 && getCurrentAutoType() != AutoType.OpMode65Ramp) {
 
             //Turn to drive to the second beacon
             if (opModeIsActive()) robotBase.turn(0 - adjustmentAngle);
@@ -287,8 +288,8 @@ public class NovaAutoBlue100 extends LinearOpMode {
             }
 
             if (getCurrentAutoType() == AutoType.OpMode95Ramp) {
-                if (opModeIsActive()) robotBase.turn(180);
-                if (opModeIsActive()) robotBase.driveStraight(70, 180);
+                if (opModeIsActive()) robotBase.turn(180 - adjustmentAngle);
+                if (opModeIsActive()) robotBase.beeline(75);
             }
 
             if (getCurrentAutoType() == AutoType.OpMode100) {
@@ -296,7 +297,7 @@ public class NovaAutoBlue100 extends LinearOpMode {
                 if (opModeIsActive()) robotBase.turn(218 - adjustmentAngle);
 
                 //go hit the ball and park on the center
-                if (opModeIsActive()) robotBase.driveStraight(48, 218 - adjustmentAngle);
+                if (opModeIsActive()) robotBase.beeline(48);
             }
         }
         //clean up the mess we made

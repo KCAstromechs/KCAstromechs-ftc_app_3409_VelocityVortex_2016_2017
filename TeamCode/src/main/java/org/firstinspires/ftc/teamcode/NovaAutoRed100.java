@@ -149,7 +149,7 @@ public class NovaAutoRed100 extends LinearOpMode {
         }
 
         //turn around to shoot into the center vortex
-        if(opModeIsActive()) robotBase.turn(120 - adjustmentAngle);
+        if(opModeIsActive()) robotBase.turn(105 - adjustmentAngle);
 
         //shoot into center vortex
         while (opModeIsActive() && robotBase.shooterHandler(true, false));
@@ -158,12 +158,12 @@ public class NovaAutoRed100 extends LinearOpMode {
 
         if (getCurrentAutoType() == AutoType.OpMode65Ramp) {
 
-            if (opModeIsActive()) robotBase.turn(200);
-            if (opModeIsActive()) robotBase.driveStraight(60, 200);
+            if (opModeIsActive()) robotBase.turn(200 - adjustmentAngle);
+            if (opModeIsActive()) robotBase.driveStraight(68, 200 - adjustmentAngle);
 
         }
 
-        if (getCurrentAutoType() != AutoType.OpMode60) {
+        if (getCurrentAutoType() != AutoType.OpMode60 && getCurrentAutoType() != AutoType.OpMode65Ramp) {
 
             //Turn to drive to the center beacon
             if (opModeIsActive()) robotBase.turn(0 - adjustmentAngle);
@@ -225,9 +225,9 @@ public class NovaAutoRed100 extends LinearOpMode {
                     if (debug)
                         System.out.println("Short turn re-turn");
                 }
+                if (opModeIsActive()) sleep(250);
             }
 
-            if (opModeIsActive()) sleep(250);
             if (opModeIsActive()) pos = robotBase.takePicture();
 
             //do some math to determine the angle the robot should drive to the beacon with
@@ -302,8 +302,8 @@ public class NovaAutoRed100 extends LinearOpMode {
 
             if (getCurrentAutoType() == AutoType.OpMode95Ramp) {
 
-                if (opModeIsActive()) robotBase.turn(180);
-                if (opModeIsActive()) robotBase.driveStraight(70, 180);
+                if (opModeIsActive()) robotBase.turn(180 - adjustmentAngle);
+                if (opModeIsActive()) robotBase.driveStraight(75, 180 - adjustmentAngle);
 
             }
 
