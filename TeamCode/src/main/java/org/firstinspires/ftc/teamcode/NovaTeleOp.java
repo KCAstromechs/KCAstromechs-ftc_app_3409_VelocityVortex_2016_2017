@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp (name="TeleOp", group="TeleOp")
-public class MarsTeleopRD extends OpMode{
+public class NovaTeleOp extends OpMode{
 
     RobotBaseMarsRD robotBase;
 
