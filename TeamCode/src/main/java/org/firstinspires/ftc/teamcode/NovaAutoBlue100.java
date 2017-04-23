@@ -300,6 +300,7 @@ public class NovaAutoBlue100 extends LinearOpMode {
             if (getCurrentAutoType() == AutoType.OpMode95Ramp) {
                 if (opModeIsActive()) robotBase.turn(180 - adjustmentAngle);
                 if (opModeIsActive()) robotBase.beeline(80, 180 - adjustmentAngle);
+
             }
 
             if (getCurrentAutoType() == AutoType.OpMode100) {

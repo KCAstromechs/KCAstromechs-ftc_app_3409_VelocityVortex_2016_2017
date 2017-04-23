@@ -50,6 +50,7 @@ public class RobotBaseNova implements SensorEventListener {
     static final double driveSpeed = 0.3;               // Default drive speed for better accuracy.
     static final double turnSpeed = 0.5;                // Default turn speed for better accuracy.
     static final double P_DRIVE_COEFF = 0.02;           // Larger is more responsive, but also less stable
+    static final double P_BEELINE_COEFF = 0.04;           // Larger is more responsive, but also less stable
     static final double P_TURN_COEFF = 0.018;          // Larger is more responsive, but also less stable
     static final double D_TURN_COEFF = -0.03;           // Larger is more responsive, but also less stable
     static final double TURN_MINIMUM_SPEED = 0.4;       //Minimum speed turn can drive at during PID control
@@ -273,7 +274,7 @@ public class RobotBaseNova implements SensorEventListener {
         while (Math.abs(encoderMotor.getCurrentPosition()) < Math.abs(target) && !Thread.interrupted()) {
             //Put the power on and hit pause for a second
             error = heading - zRotation;
-            correction = Range.clip(error * P_DRIVE_COEFF, -1, 1);
+            correction = Range.clip(error * P_BEELINE_COEFF, -1, 1);
             leftPower = power + correction;
             rightPower = power - correction;
             leftPower = Range.clip(leftPower, -1.0, 1.0);
