@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp (name="TeleOp", group="TeleOp")
 public class NovaTeleOp extends OpMode{
 
-    RobotBaseMarsRD robotBase;
+    RobotBaseNova robotBase;
 
     boolean released = true;
     boolean bReleased = false;
@@ -19,10 +19,10 @@ public class NovaTeleOp extends OpMode{
 
     @Override
     public void init(){
-        robotBase = new RobotBaseMarsRD();
+        robotBase = new RobotBaseNova();
         robotBase.init(hardwareMap, this);
         robotBase.setReloadAfterShot(true);
-        RobotBaseMarsRD.teleOpDebug = false;
+        RobotBaseNova.teleOpDebug = false;
     }
 
     @Override

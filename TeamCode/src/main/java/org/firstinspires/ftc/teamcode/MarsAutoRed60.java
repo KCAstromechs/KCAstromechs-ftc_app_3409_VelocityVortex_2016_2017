@@ -8,12 +8,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Autonomous(name="Mars Red 60", group="Red")
 public class MarsAutoRed60 extends LinearOpMode {
     
-    RobotBaseMarsRD robotBase;                                      //Pull in the robotBase for our use
+    RobotBaseNova robotBase;                                      //Pull in the robotBase for our use
     boolean debug = false;                                          //Turn debug mode on or off (won't sout if off)
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robotBase = new RobotBaseMarsRD();                          //Finish pulling in robotBase
+        robotBase = new RobotBaseNova();                          //Finish pulling in robotBase
         robotBase.init(hardwareMap, this);                          //Call init to est. hardware map and sensors
         robotBase.initVuforia();                                    //Open vuforia
         robotBase.setDebug(debug);

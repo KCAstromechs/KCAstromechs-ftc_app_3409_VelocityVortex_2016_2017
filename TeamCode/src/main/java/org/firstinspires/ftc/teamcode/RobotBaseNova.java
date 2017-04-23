@@ -43,7 +43,7 @@ import android.graphics.Bitmap;
 
 import static android.content.Context.SENSOR_SERVICE;
 
-public class RobotBaseMarsRD implements SensorEventListener {
+public class RobotBaseNova implements SensorEventListener {
     static final double COUNTS_PER_MOTOR_REV = 1100;    // NeveRest Motor Encoder
     static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_INCHES = 4.0;    // For figuring circumference
@@ -244,9 +244,16 @@ public class RobotBaseMarsRD implements SensorEventListener {
         motorSpinner.setPower(0);
     }
 
-    public void beeline(double inches) {
+    /**
+     * Simpler method than driveStraight() without ramp ups, ramp downs, or angle correction.
+     * We run this method at full power in scenarios where the accuracy of the drive is irrelavent (drive to ramp).
+     * @param inches target to drive
+     */
+    public void beeline(double inches, int heading) {
         int target = (int) (inches * COUNTS_PER_INCH);          //translates the number of inches to be driven into encoder ticks
         double power = 1;
+
+        double leftPower, rightPower, error, correction;
 
         //Ensure that motors are set up correctly to drive
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -265,7 +272,13 @@ public class RobotBaseMarsRD implements SensorEventListener {
         //While: we have not driven correct distance & bot is not stopped
         while (Math.abs(encoderMotor.getCurrentPosition()) < Math.abs(target) && !Thread.interrupted()) {
             //Put the power on and hit pause for a second
-            updateDriveMotors(power, power, false);
+            error = heading - zRotation;
+            correction = Range.clip(error * P_DRIVE_COEFF, -1, 1);
+            leftPower = power + correction;
+            rightPower = power - correction;
+            leftPower = Range.clip(leftPower, -1.0, 1.0);
+            rightPower = Range.clip(rightPower, -1.0, 1.0);
+            updateDriveMotors(leftPower, rightPower, false);
             Thread.yield();
         }
 
@@ -1227,9 +1240,9 @@ public class RobotBaseMarsRD implements SensorEventListener {
     public void onSensorChanged(SensorEvent sensorEvent) {
         SensorManager.getRotationMatrixFromVector(rotationMatrix, sensorEvent.values);
         SensorManager.getOrientation(rotationMatrix, orientation);
-//        Dbg("orientation: " , orientation[0], false);
 
         rawGyro = (float) Math.toDegrees(orientation[0]);
+
         //If the zero hasn't been zeroed do the zero
         if (!hasBeenZeroed) {
             hasBeenZeroed = true;

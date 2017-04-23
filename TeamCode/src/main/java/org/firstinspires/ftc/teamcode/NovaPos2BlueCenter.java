@@ -11,12 +11,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Autonomous(name="Blue Pos 2 Center", group="Blue")
 public class NovaPos2BlueCenter extends LinearOpMode{
 
-    RobotBaseMarsRD robotBase;
+    RobotBaseNova robotBase;
     boolean debug = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robotBase = new RobotBaseMarsRD();
+        robotBase = new RobotBaseNova();
         robotBase.init(hardwareMap, this);
         robotBase.setDebug(debug);
 

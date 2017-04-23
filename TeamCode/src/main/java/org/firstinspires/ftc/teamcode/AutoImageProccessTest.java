@@ -5,9 +5,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.robot.Robot;
 
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
 
@@ -17,14 +15,14 @@ import org.firstinspires.ftc.robotcore.internal.AppUtil;
 @Autonomous(name = "AutoImageProccessTest", group = "State testing")
 public class AutoImageProccessTest extends LinearOpMode {
 
-    RobotBaseMarsRD robotBase;
+    RobotBaseNova robotBase;
     protected RelativeLayout squaresOverlay = null;
     protected AppUtil appUtil = AppUtil.getInstance();
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        robotBase = new RobotBaseMarsRD();
+        robotBase = new RobotBaseNova();
         robotBase.initVuforia();
         robotBase.setDebug(true);
 

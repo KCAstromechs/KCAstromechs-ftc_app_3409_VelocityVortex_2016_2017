@@ -8,10 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
-import org.firstinspires.ftc.teamcode.BeaconOrientation;
-import org.firstinspires.ftc.teamcode.R;
-import org.firstinspires.ftc.teamcode.RobotBaseMarsRD;
-import org.firstinspires.ftc.teamcode.TimeoutException;
 
 
 /**
@@ -23,12 +19,12 @@ public class GyroVuforiaTest extends LinearOpMode{
 
     protected AppUtil appUtil = AppUtil.getInstance();
     protected RelativeLayout squaresOverlay = null;
-    RobotBaseMarsRD robotBase;
+    RobotBaseNova robotBase;
 
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robotBase = new RobotBaseMarsRD();
+        robotBase = new RobotBaseNova();
         robotBase.initVuforia();
         robotBase.init(hardwareMap, this);
 

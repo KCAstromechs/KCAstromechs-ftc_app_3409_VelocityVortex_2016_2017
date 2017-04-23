@@ -5,7 +5,6 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
@@ -13,26 +12,30 @@ import org.firstinspires.ftc.robotcore.internal.AppUtil;
 @Autonomous(name="Red 100", group="Red")
 public class NovaAutoRed100 extends LinearOpMode {
 
-    RobotBaseMarsRD robotBase;
+    RobotBaseNova robotBase;
     boolean debug = false;
     boolean longTurn;
 
+    //declares variables for line up box overlay on vuforia display
     protected RelativeLayout squaresOverlay = null;
     protected AppUtil appUtil = AppUtil.getInstance();
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        robotBase = new RobotBaseMarsRD();
+        //initializes
+        robotBase = new RobotBaseNova();
         robotBase.init(hardwareMap, this);
         robotBase.initVuforia();
         robotBase.setDebug(debug);
 
+        //declares variables for beacon orientation
         int pos = -1;
         int beacon2 = -1;
 
         final int adjustmentAngle = -19;           //Adjust the angle on everything by this
 
+        //declares variables for math determining the beacon drive angle
         double shiftedAvg;
         double deltaX;
         double correctionAngle;
@@ -52,6 +55,7 @@ public class NovaAutoRed100 extends LinearOpMode {
         while(!robotBase.isCocked()){
             robotBase.shooterHandler(false, true);
         }
+
         //After shooter cocks, stop motor
         robotBase.shooterHandler(false, false);
 
@@ -85,7 +89,8 @@ public class NovaAutoRed100 extends LinearOpMode {
             }
         });
 
-        if (getCurrentAutoType() != AutoType.OpMode60) {
+        //If we are not running an auto that doesn't attempt the second beacon, take a long distance pic of it.
+        if (getCurrentAutoType() != AutoType.OpMode60 && getCurrentAutoType() != AutoType.OpMode65Ramp) {
             if (opModeIsActive()) beacon2 = robotBase.takeLongDistancePicture(520, 650);
         }
 
@@ -128,8 +133,8 @@ public class NovaAutoRed100 extends LinearOpMode {
         telemetry.addData("pos ", pos);
         telemetry.update();
 
-        //if the current picture matches the last one and they both say blue is on the left, go for the left!
-        if (pos == RobotBaseMarsRD.BEACON_RED_BLUE){
+        //if the picture analysis says red is on the left, go for the left!
+        if (pos == RobotBaseNova.BEACON_RED_BLUE){
             try {
                 if(opModeIsActive()) robotBase.pushButton(270 - adjustmentAngle + (int)correctionAngle, 270 - adjustmentAngle, 2);
             }
@@ -137,8 +142,8 @@ public class NovaAutoRed100 extends LinearOpMode {
                 if(opModeIsActive()) robotBase.driveStraight(-20, -0.5, 270 - adjustmentAngle);
             }
         }
-        //If they match and say blue is on the right, go for the right
-        else if (pos == RobotBaseMarsRD.BEACON_BLUE_RED){
+        //if the picture analysis says red is on the right, go for the right!
+        else if (pos == RobotBaseNova.BEACON_BLUE_RED){
             if(opModeIsActive()) robotBase.turn(280 - adjustmentAngle +(float)correctionAngle);
             try {
                 if(opModeIsActive()) robotBase.pushButton(280 - adjustmentAngle+ (int)correctionAngle, 280 - adjustmentAngle, 2);
@@ -156,41 +161,42 @@ public class NovaAutoRed100 extends LinearOpMode {
         while (opModeIsActive() && robotBase.reloadHandler(true));
         while (opModeIsActive() && robotBase.shooterHandler(true, false));
 
+        //if the AutoType flag says we are driving to the ramp after hitting the first beacon, drive to ramp
         if (getCurrentAutoType() == AutoType.OpMode65Ramp) {
 
             if (opModeIsActive()) robotBase.turn(200 - adjustmentAngle);
-            if (opModeIsActive()) robotBase.driveStraight(68, 200 - adjustmentAngle);
+            if (opModeIsActive()) robotBase.beeline(68, 200 - adjustmentAngle);
 
         }
 
         if (getCurrentAutoType() != AutoType.OpMode60 && getCurrentAutoType() != AutoType.OpMode65Ramp) {
 
-            //Turn to drive to the center beacon
+            //Turn to drive to the second beacon
             if (opModeIsActive()) robotBase.turn(0 - adjustmentAngle);
 
-            //Determine how far to drive depending on the orientations of both beacons, turn based on how far you drove
-            if (beacon2 == RobotBaseMarsRD.BEACON_RED_BLUE && pos == RobotBaseMarsRD.BEACON_BLUE_RED) {
+            //Determine how far to drive depending on the orientations of both beacons, angle of turn based on how far you drove
+            if (beacon2 == RobotBaseNova.BEACON_RED_BLUE && pos == RobotBaseNova.BEACON_BLUE_RED) {
                 if (opModeIsActive()) robotBase.driveStraight(38, 0 - adjustmentAngle);
                 if (opModeIsActive()) robotBase.turn(285 - adjustmentAngle);
                 longTurn = true;
                 if (debug)
                     System.out.println("SSS Short drive Blue-Red Red-Blue");
             }
-            else if ((beacon2 == RobotBaseMarsRD.BEACON_BLUE_RED && pos == RobotBaseMarsRD.BEACON_BLUE_RED)) {
+            else if ((beacon2 == RobotBaseNova.BEACON_BLUE_RED && pos == RobotBaseNova.BEACON_BLUE_RED)) {
                 if (opModeIsActive()) robotBase.driveStraight(43, 0 - adjustmentAngle);
                 if (opModeIsActive()) robotBase.turn(275 - adjustmentAngle);
                 longTurn = false;
                 if (debug)
                     System.out.println("SSS Medium drive Blue-Red Blue-Red");
             }
-            else if (beacon2 == RobotBaseMarsRD.BEACON_RED_BLUE && pos == RobotBaseMarsRD.BEACON_RED_BLUE) {
+            else if (beacon2 == RobotBaseNova.BEACON_RED_BLUE && pos == RobotBaseNova.BEACON_RED_BLUE) {
                 if (opModeIsActive()) robotBase.driveStraight(36, 0 - adjustmentAngle);
                 if (opModeIsActive()) robotBase.turn(285 - adjustmentAngle);
                 longTurn = true;
                 if (debug)
                     System.out.println("SSS Medium drive Red-Blue Red-Blue");
             }
-            else if (beacon2 == RobotBaseMarsRD.BEACON_BLUE_RED && pos == RobotBaseMarsRD.BEACON_RED_BLUE) {
+            else if (beacon2 == RobotBaseNova.BEACON_BLUE_RED && pos == RobotBaseNova.BEACON_RED_BLUE) {
                 if (opModeIsActive()) robotBase.driveStraight(46, 0 - adjustmentAngle);
                 if (opModeIsActive()) robotBase.turn(275 - adjustmentAngle);
                 longTurn = false;
@@ -205,7 +211,9 @@ public class NovaAutoRed100 extends LinearOpMode {
                     System.out.println("SSS Failsafe drive");
             }
 
-            //waits for robot to come to rest, then takes picture to determine beacon orientation
+			//distance from BLUE_RED endpoint to line = 40 inches
+
+            //waits for robot to come to rest, then takes new picture to determine beacon orientation
             if (opModeIsActive()) sleep(500);
 
             if (debug)
@@ -226,9 +234,8 @@ public class NovaAutoRed100 extends LinearOpMode {
                         System.out.println("Short turn re-turn");
                 }
                 if (opModeIsActive()) sleep(250);
+                if (opModeIsActive()) pos = robotBase.takePicture();
             }
-
-            if (opModeIsActive()) pos = robotBase.takePicture();
 
             //do some math to determine the angle the robot should drive to the beacon with
             shiftedAvg = ((270 - robotBase.getZRotation() - adjustmentAngle) * robotBase.PIXELS_PER_DEGREE) + robotBase.getLastPicBeaconAvg();
@@ -251,7 +258,7 @@ public class NovaAutoRed100 extends LinearOpMode {
 
             //drive to actually hit the second beacon's button
             //if the current picture matches the last one and they both say blue is on the left, go for the left!
-            if ((pos == RobotBaseMarsRD.BEACON_RED_BLUE) && (beacon2 == RobotBaseMarsRD.BEACON_RED_BLUE)) {
+            if ((pos == RobotBaseNova.BEACON_RED_BLUE) && (beacon2 == RobotBaseNova.BEACON_RED_BLUE)) {
                 try {
                     if (opModeIsActive())
                         robotBase.pushButton(270 - adjustmentAngle + (int) correctionAngle, 270 - adjustmentAngle, 2);
@@ -261,7 +268,7 @@ public class NovaAutoRed100 extends LinearOpMode {
                 }
             }
             //If they match and say blue is on the right, go for the right
-            else if ((pos == RobotBaseMarsRD.BEACON_BLUE_RED) && (beacon2 == RobotBaseMarsRD.BEACON_BLUE_RED)) {
+            else if ((pos == RobotBaseNova.BEACON_BLUE_RED) && (beacon2 == RobotBaseNova.BEACON_BLUE_RED)) {
                 if (opModeIsActive())
                     robotBase.turn(285 - adjustmentAngle + (float) correctionAngle);
                 try {
@@ -300,10 +307,11 @@ public class NovaAutoRed100 extends LinearOpMode {
                 }
             }
 
+            //if AutoType flag tells us we are not driving to ramp after second beacon,
             if (getCurrentAutoType() == AutoType.OpMode95Ramp) {
 
                 if (opModeIsActive()) robotBase.turn(180 - adjustmentAngle);
-                if (opModeIsActive()) robotBase.driveStraight(75, 180 - adjustmentAngle);
+                if (opModeIsActive()) robotBase.beeline(80, 180 - adjustmentAngle);
 
             }
 
@@ -312,7 +320,7 @@ public class NovaAutoRed100 extends LinearOpMode {
                 if (opModeIsActive()) robotBase.turn(142 - adjustmentAngle);
 
                 //go hit the ball and park on the center
-                if (opModeIsActive()) robotBase.driveStraight(48, 142 - adjustmentAngle);
+                if (opModeIsActive()) robotBase.beeline(48, 142 - adjustmentAngle);
             }
         }
 

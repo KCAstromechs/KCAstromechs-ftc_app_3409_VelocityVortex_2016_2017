@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Autonomous(name="Blue Pos 2 Ramp", group="Blue")
 public class NovaPos2BlueRamp extends LinearOpMode{
 
-    RobotBaseMarsRD robotBase;
+    RobotBaseNova robotBase;
 
     //determines whether we want to dump data
     boolean debug = false;
@@ -19,7 +19,7 @@ public class NovaPos2BlueRamp extends LinearOpMode{
     @Override
     public void runOpMode() throws InterruptedException {
         //gives us instance of robot base
-        robotBase = new RobotBaseMarsRD();
+        robotBase = new RobotBaseNova();
 
         //sets up robot variables, moves servos to starting positions, and gives robotbase this instance of OpMode
         robotBase.init(hardwareMap, this);
